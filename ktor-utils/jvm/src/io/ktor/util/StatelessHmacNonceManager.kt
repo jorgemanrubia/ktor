@@ -8,6 +8,9 @@ import kotlinx.coroutines.runBlocking
 import java.util.concurrent.*
 import javax.crypto.*
 import javax.crypto.spec.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Stateless nonce manager implementation with HMAC verification and timeout.
@@ -29,6 +32,35 @@ public class StatelessHmacNonceManager private constructor(
     dummy: Unit
 ) : NonceManager {
 
+    /**
+     * Creates a nonce manager with the given [keySpec] and the default timeout of 6 seconds.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.util.StatelessHmacNonceManager.StatelessHmacNonceManager)
+     */
+    public constructor(keySpec: SecretKeySpec) : this(keySpec, timeout = 6.seconds)
+
+    /**
+     * Creates a nonce manager with the given [keySpec], HMAC [algorithm] and nonce [timeout].
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.util.StatelessHmacNonceManager.StatelessHmacNonceManager)
+     *
+     * @param timeout specifies the amount of time for a nonce to be considered valid
+     */
+    public constructor(
+        keySpec: SecretKeySpec,
+        timeout: Duration,
+        algorithm: String = "HmacSHA256",
+        nonceGenerator: suspend () -> String = { generateNonceSuspend() },
+    ) : this(keySpec, algorithm, timeout.inWholeMilliseconds, suspendNonceGenerator = nonceGenerator, dummy = Unit)
+
+    @Deprecated(
+        "Use the constructor with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "StatelessHmacNonceManager(keySpec, timeoutMillis.milliseconds, algorithm, nonceGenerator)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public constructor(
         keySpec: SecretKeySpec,
         algorithm: String = "HmacSHA256",
@@ -37,10 +69,45 @@ public class StatelessHmacNonceManager private constructor(
     ) : this (keySpec, algorithm, timeoutMillis, suspendNonceGenerator = nonceGenerator, dummy = Unit)
 
     /**
+     * Helper constructor that makes a secret key from [key] ByteArray with the default timeout of 60 seconds.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.util.StatelessHmacNonceManager.StatelessHmacNonceManager)
+     */
+    public constructor(key: ByteArray) : this(key, timeout = 60.seconds)
+
+    /**
+     * Helper constructor that makes a secret key from [key] ByteArray
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.util.StatelessHmacNonceManager.StatelessHmacNonceManager)
+     *
+     * @param timeout specifies the amount of time for a nonce to be considered valid
+     */
+    public constructor(
+        key: ByteArray,
+        timeout: Duration,
+        algorithm: String = "HmacSHA256",
+        nonceGenerator: suspend () -> String = { generateNonceSuspend() },
+    ) : this(
+        SecretKeySpec(key, algorithm),
+        algorithm,
+        timeout.inWholeMilliseconds,
+        suspendNonceGenerator = nonceGenerator,
+        dummy = Unit
+    )
+
+    /**
      * Helper constructor that makes a secret key from [key] ByteArray
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.util.StatelessHmacNonceManager.StatelessHmacNonceManager)
      */
+    @Deprecated(
+        "Use the constructor with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "StatelessHmacNonceManager(key, timeoutMillis.milliseconds, algorithm, nonceGenerator)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public constructor(
         key: ByteArray,
         algorithm: String = "HmacSHA256",

@@ -30,6 +30,7 @@ public fun WebSockets(
  *
  * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.websocket.pingInterval)
  */
+@Suppress("DEPRECATION")
 public inline val WebSockets.pingInterval: Duration?
     get() = pingIntervalMillis.takeIf { it > PINGER_DISABLED }?.milliseconds
 
@@ -40,6 +41,7 @@ public inline val WebSockets.pingInterval: Duration?
  *
  * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.websocket.pingInterval)
  */
+@Suppress("DEPRECATION")
 public inline var WebSockets.Config.pingInterval: Duration?
     get() = pingIntervalMillis.takeIf { it > PINGER_DISABLED }?.milliseconds
     set(new) {

@@ -12,13 +12,17 @@ public final class io/ktor/server/cio/CIOApplicationEngine : io/ktor/server/engi
 	public fun start (Z)Lio/ktor/server/engine/ApplicationEngine;
 	public fun startSuspend (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun stop (JJ)V
+	public fun stop-QTBD994 (JJ)V
 	public fun stopSuspend (JJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun stopSuspend-NqJ4yvY (JJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/ktor/server/cio/CIOApplicationEngine$Configuration : io/ktor/server/engine/BaseApplicationEngine$Configuration {
 	public fun <init> ()V
+	public final fun getConnectionIdleTimeout-UwyO8pc ()J
 	public final fun getConnectionIdleTimeoutSeconds ()I
 	public final fun getReuseAddress ()Z
+	public final fun setConnectionIdleTimeout-LRDsOJo (J)V
 	public final fun setConnectionIdleTimeoutSeconds (I)V
 	public final fun setReuseAddress (Z)V
 }
@@ -36,6 +40,12 @@ public final class io/ktor/server/cio/HttpServer {
 	public final fun getServerSocket ()Lkotlinx/coroutines/Deferred;
 }
 
+public final class io/ktor/server/cio/HttpServerKt {
+	public static final fun HttpServerSettings-exY8QGI (Ljava/lang/String;IJZ)Lio/ktor/server/cio/HttpServerSettings;
+	public static synthetic fun HttpServerSettings-exY8QGI$default (Ljava/lang/String;IJZILjava/lang/Object;)Lio/ktor/server/cio/HttpServerSettings;
+	public static final fun UnixSocketServerSettings-HG0u8IE (Ljava/lang/String;J)Lio/ktor/server/cio/UnixSocketServerSettings;
+}
+
 public final class io/ktor/server/cio/HttpServerSettings {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;IJZ)V
@@ -47,6 +57,7 @@ public final class io/ktor/server/cio/HttpServerSettings {
 	public final fun copy (Ljava/lang/String;IJZ)Lio/ktor/server/cio/HttpServerSettings;
 	public static synthetic fun copy$default (Lio/ktor/server/cio/HttpServerSettings;Ljava/lang/String;IJZILjava/lang/Object;)Lio/ktor/server/cio/HttpServerSettings;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConnectionIdleTimeout-UwyO8pc ()J
 	public final fun getConnectionIdleTimeoutSeconds ()J
 	public final fun getHost ()Ljava/lang/String;
 	public final fun getPort ()I
@@ -77,8 +88,10 @@ public final class io/ktor/server/cio/UnixSocketConnectorConfigKt {
 }
 
 public final class io/ktor/server/cio/UnixSocketServerSettings {
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;J)V
 	public synthetic fun <init> (Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getConnectionIdleTimeout-UwyO8pc ()J
 	public final fun getConnectionIdleTimeoutSeconds ()J
 	public final fun getSocketPath ()Ljava/lang/String;
 }

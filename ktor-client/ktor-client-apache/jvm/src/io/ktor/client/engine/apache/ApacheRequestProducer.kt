@@ -152,6 +152,7 @@ internal class ApacheRequestProducer(
             }
         }
 
+        @Suppress("DEPRECATION")
         with(config) {
             builder.config = RequestConfig.custom()
                 .setRedirectsEnabled(followRedirects)
@@ -170,7 +171,11 @@ internal class ApacheRequestProducer(
 @OptIn(InternalAPI::class)
 private fun RequestConfig.Builder.setupTimeoutAttributes(requestData: HttpRequestData): RequestConfig.Builder = also {
     requestData.getCapabilityOrNull(HttpTimeoutCapability)?.let { timeoutAttributes ->
-        timeoutAttributes.connectTimeoutMillis?.let { setConnectTimeout(convertLongTimeoutToIntWithInfiniteAsZero(it)) }
-        timeoutAttributes.socketTimeoutMillis?.let { setSocketTimeout(convertLongTimeoutToIntWithInfiniteAsZero(it)) }
+        timeoutAttributes.connectTimeout?.inWholeMilliseconds?.let {
+            setConnectTimeout(convertLongTimeoutToIntWithInfiniteAsZero(it))
+        }
+        timeoutAttributes.socketTimeout?.inWholeMilliseconds?.let {
+            setSocketTimeout(convertLongTimeoutToIntWithInfiniteAsZero(it))
+        }
     }
 }

@@ -247,6 +247,9 @@ sealed class io.ktor.network.sockets/SocketOptions { // io.ktor.network.sockets/
         final var keepAlive // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.keepAlive|{}keepAlive[0]
             final fun <get-keepAlive>(): kotlin/Boolean? // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.keepAlive.<get-keepAlive>|<get-keepAlive>(){}[0]
             final fun <set-keepAlive>(kotlin/Boolean?) // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.keepAlive.<set-keepAlive>|<set-keepAlive>(kotlin.Boolean?){}[0]
+        final var linger // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.linger|{}linger[0]
+            final fun <get-linger>(): kotlin.time/Duration? // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.linger.<get-linger>|<get-linger>(){}[0]
+            final fun <set-linger>(kotlin.time/Duration?) // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.linger.<set-linger>|<set-linger>(kotlin.time.Duration?){}[0]
         final var lingerSeconds // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.lingerSeconds|{}lingerSeconds[0]
             final fun <get-lingerSeconds>(): kotlin/Int // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.lingerSeconds.<get-lingerSeconds>|<get-lingerSeconds>(){}[0]
             final fun <set-lingerSeconds>(kotlin/Int) // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.lingerSeconds.<set-lingerSeconds>|<set-lingerSeconds>(kotlin.Int){}[0]
@@ -256,6 +259,9 @@ sealed class io.ktor.network.sockets/SocketOptions { // io.ktor.network.sockets/
         final var socketTimeout // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.socketTimeout|{}socketTimeout[0]
             final fun <get-socketTimeout>(): kotlin/Long // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.socketTimeout.<get-socketTimeout>|<get-socketTimeout>(){}[0]
             final fun <set-socketTimeout>(kotlin/Long) // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.socketTimeout.<set-socketTimeout>|<set-socketTimeout>(kotlin.Long){}[0]
+        final var socketTimeoutDuration // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.socketTimeoutDuration|{}socketTimeoutDuration[0]
+            final fun <get-socketTimeoutDuration>(): kotlin.time/Duration // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.socketTimeoutDuration.<get-socketTimeoutDuration>|<get-socketTimeoutDuration>(){}[0]
+            final fun <set-socketTimeoutDuration>(kotlin.time/Duration) // io.ktor.network.sockets/SocketOptions.TCPClientSocketOptions.socketTimeoutDuration.<set-socketTimeoutDuration>|<set-socketTimeoutDuration>(kotlin.time.Duration){}[0]
     }
 
     final class UDPSocketOptions : io.ktor.network.sockets/SocketOptions.PeerSocketOptions { // io.ktor.network.sockets/SocketOptions.UDPSocketOptions|null[0]

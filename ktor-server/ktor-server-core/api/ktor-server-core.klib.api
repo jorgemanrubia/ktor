@@ -140,7 +140,11 @@ abstract interface io.ktor.server.engine/ApplicationEngine { // io.ktor.server.e
     abstract fun start(kotlin/Boolean = ...): io.ktor.server.engine/ApplicationEngine // io.ktor.server.engine/ApplicationEngine.start|start(kotlin.Boolean){}[0]
     abstract fun stop(kotlin/Long = ..., kotlin/Long = ...) // io.ktor.server.engine/ApplicationEngine.stop|stop(kotlin.Long;kotlin.Long){}[0]
     abstract suspend fun resolvedConnectors(): kotlin.collections/List<io.ktor.server.engine/EngineConnectorConfig> // io.ktor.server.engine/ApplicationEngine.resolvedConnectors|resolvedConnectors(){}[0]
+    open fun stop() // io.ktor.server.engine/ApplicationEngine.stop|stop(){}[0]
+    open fun stop(kotlin.time/Duration, kotlin.time/Duration = ...) // io.ktor.server.engine/ApplicationEngine.stop|stop(kotlin.time.Duration;kotlin.time.Duration){}[0]
     open suspend fun startSuspend(kotlin/Boolean = ...): io.ktor.server.engine/ApplicationEngine // io.ktor.server.engine/ApplicationEngine.startSuspend|startSuspend(kotlin.Boolean){}[0]
+    open suspend fun stopSuspend() // io.ktor.server.engine/ApplicationEngine.stopSuspend|stopSuspend(){}[0]
+    open suspend fun stopSuspend(kotlin.time/Duration, kotlin.time/Duration = ...) // io.ktor.server.engine/ApplicationEngine.stopSuspend|stopSuspend(kotlin.time.Duration;kotlin.time.Duration){}[0]
     open suspend fun stopSuspend(kotlin/Long = ..., kotlin/Long = ...) // io.ktor.server.engine/ApplicationEngine.stopSuspend|stopSuspend(kotlin.Long;kotlin.Long){}[0]
 
     open class Configuration { // io.ktor.server.engine/ApplicationEngine.Configuration|null[0]
@@ -161,15 +165,23 @@ abstract interface io.ktor.server.engine/ApplicationEngine { // io.ktor.server.e
         final var shutdownGracePeriod // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownGracePeriod|{}shutdownGracePeriod[0]
             final fun <get-shutdownGracePeriod>(): kotlin/Long // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownGracePeriod.<get-shutdownGracePeriod>|<get-shutdownGracePeriod>(){}[0]
             final fun <set-shutdownGracePeriod>(kotlin/Long) // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownGracePeriod.<set-shutdownGracePeriod>|<set-shutdownGracePeriod>(kotlin.Long){}[0]
+        final var shutdownGracePeriodDuration // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownGracePeriodDuration|{}shutdownGracePeriodDuration[0]
+            final fun <get-shutdownGracePeriodDuration>(): kotlin.time/Duration // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownGracePeriodDuration.<get-shutdownGracePeriodDuration>|<get-shutdownGracePeriodDuration>(){}[0]
+            final fun <set-shutdownGracePeriodDuration>(kotlin.time/Duration) // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownGracePeriodDuration.<set-shutdownGracePeriodDuration>|<set-shutdownGracePeriodDuration>(kotlin.time.Duration){}[0]
         final var shutdownTimeout // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownTimeout|{}shutdownTimeout[0]
             final fun <get-shutdownTimeout>(): kotlin/Long // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownTimeout.<get-shutdownTimeout>|<get-shutdownTimeout>(){}[0]
             final fun <set-shutdownTimeout>(kotlin/Long) // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownTimeout.<set-shutdownTimeout>|<set-shutdownTimeout>(kotlin.Long){}[0]
+        final var shutdownTimeoutDuration // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownTimeoutDuration|{}shutdownTimeoutDuration[0]
+            final fun <get-shutdownTimeoutDuration>(): kotlin.time/Duration // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownTimeoutDuration.<get-shutdownTimeoutDuration>|<get-shutdownTimeoutDuration>(){}[0]
+            final fun <set-shutdownTimeoutDuration>(kotlin.time/Duration) // io.ktor.server.engine/ApplicationEngine.Configuration.shutdownTimeoutDuration.<set-shutdownTimeoutDuration>|<set-shutdownTimeoutDuration>(kotlin.time.Duration){}[0]
         final var workerGroupSize // io.ktor.server.engine/ApplicationEngine.Configuration.workerGroupSize|{}workerGroupSize[0]
             final fun <get-workerGroupSize>(): kotlin/Int // io.ktor.server.engine/ApplicationEngine.Configuration.workerGroupSize.<get-workerGroupSize>|<get-workerGroupSize>(){}[0]
             final fun <set-workerGroupSize>(kotlin/Int) // io.ktor.server.engine/ApplicationEngine.Configuration.workerGroupSize.<set-workerGroupSize>|<set-workerGroupSize>(kotlin.Int){}[0]
 
         final fun takeFrom(io.ktor.server.engine/ApplicationEngine.Configuration) // io.ktor.server.engine/ApplicationEngine.Configuration.takeFrom|takeFrom(io.ktor.server.engine.ApplicationEngine.Configuration){}[0]
     }
+
+    final object Companion // io.ktor.server.engine/ApplicationEngine.Companion|null[0]
 }
 
 abstract interface io.ktor.server.engine/EngineConnectorConfig { // io.ktor.server.engine/EngineConnectorConfig|null[0]
@@ -478,8 +490,12 @@ final class <#A: io.ktor.server.engine/ApplicationEngine, #B: io.ktor.server.eng
         final fun <get-monitor>(): io.ktor.events/Events // io.ktor.server.engine/EmbeddedServer.monitor.<get-monitor>|<get-monitor>(){}[0]
 
     final fun start(kotlin/Boolean = ...): io.ktor.server.engine/EmbeddedServer<#A, #B> // io.ktor.server.engine/EmbeddedServer.start|start(kotlin.Boolean){}[0]
+    final fun stop() // io.ktor.server.engine/EmbeddedServer.stop|stop(){}[0]
+    final fun stop(kotlin.time/Duration = ..., kotlin.time/Duration = ...) // io.ktor.server.engine/EmbeddedServer.stop|stop(kotlin.time.Duration;kotlin.time.Duration){}[0]
     final fun stop(kotlin/Long = ..., kotlin/Long = ...) // io.ktor.server.engine/EmbeddedServer.stop|stop(kotlin.Long;kotlin.Long){}[0]
     final suspend fun startSuspend(kotlin/Boolean = ...): io.ktor.server.engine/EmbeddedServer<#A, #B> // io.ktor.server.engine/EmbeddedServer.startSuspend|startSuspend(kotlin.Boolean){}[0]
+    final suspend fun stopSuspend() // io.ktor.server.engine/EmbeddedServer.stopSuspend|stopSuspend(){}[0]
+    final suspend fun stopSuspend(kotlin.time/Duration = ..., kotlin.time/Duration = ...) // io.ktor.server.engine/EmbeddedServer.stopSuspend|stopSuspend(kotlin.time.Duration;kotlin.time.Duration){}[0]
     final suspend fun stopSuspend(kotlin/Long = ..., kotlin/Long = ...) // io.ktor.server.engine/EmbeddedServer.stopSuspend|stopSuspend(kotlin.Long;kotlin.Long){}[0]
 }
 
@@ -1794,6 +1810,8 @@ final fun (io.ktor.server.config/ApplicationConfig).io.ktor.server.config/mergeW
 final fun (io.ktor.server.config/ApplicationConfig).io.ktor.server.config/tryGetString(kotlin/String): kotlin/String? // io.ktor.server.config/tryGetString|tryGetString@io.ktor.server.config.ApplicationConfig(kotlin.String){}[0]
 final fun (io.ktor.server.config/ApplicationConfig).io.ktor.server.config/tryGetStringList(kotlin/String): kotlin.collections/List<kotlin/String>? // io.ktor.server.config/tryGetStringList|tryGetStringList@io.ktor.server.config.ApplicationConfig(kotlin.String){}[0]
 final fun (io.ktor.server.config/ApplicationConfig).io.ktor.server.config/withFallback(io.ktor.server.config/ApplicationConfig): io.ktor.server.config/ApplicationConfig // io.ktor.server.config/withFallback|withFallback@io.ktor.server.config.ApplicationConfig(io.ktor.server.config.ApplicationConfig){}[0]
+final fun (io.ktor.server.engine/ApplicationEngine).io.ktor.server.engine/stopServerOnCancellation(io.ktor.server.application/Application): kotlinx.coroutines/CompletableJob // io.ktor.server.engine/stopServerOnCancellation|stopServerOnCancellation@io.ktor.server.engine.ApplicationEngine(io.ktor.server.application.Application){}[0]
+final fun (io.ktor.server.engine/ApplicationEngine).io.ktor.server.engine/stopServerOnCancellation(io.ktor.server.application/Application, kotlin.time/Duration, kotlin.time/Duration = ...): kotlinx.coroutines/CompletableJob // io.ktor.server.engine/stopServerOnCancellation|stopServerOnCancellation@io.ktor.server.engine.ApplicationEngine(io.ktor.server.application.Application;kotlin.time.Duration;kotlin.time.Duration){}[0]
 final fun (io.ktor.server.engine/ApplicationEngine).io.ktor.server.engine/stopServerOnCancellation(io.ktor.server.application/Application, kotlin/Long = ..., kotlin/Long = ...): kotlinx.coroutines/CompletableJob // io.ktor.server.engine/stopServerOnCancellation|stopServerOnCancellation@io.ktor.server.engine.ApplicationEngine(io.ktor.server.application.Application;kotlin.Long;kotlin.Long){}[0]
 final fun (io.ktor.server.engine/ApplicationEngine.Configuration).io.ktor.server.engine/loadCommonConfiguration(io.ktor.server.config/ApplicationConfig) // io.ktor.server.engine/loadCommonConfiguration|loadCommonConfiguration@io.ktor.server.engine.ApplicationEngine.Configuration(io.ktor.server.config.ApplicationConfig){}[0]
 final fun (io.ktor.server.engine/ApplicationEnvironmentBuilder).io.ktor.server.engine/configure(kotlin/Array<out io.ktor.server.config/ApplicationConfig>...) // io.ktor.server.engine/configure|configure@io.ktor.server.engine.ApplicationEnvironmentBuilder(kotlin.Array<out|io.ktor.server.config.ApplicationConfig>...){}[0]

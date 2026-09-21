@@ -10,6 +10,10 @@ import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.utils.io.*
+import kotlin.math.roundToLong
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 /**
  *  A configuration for the [HSTS] settings for a host.
@@ -38,10 +42,28 @@ public open class HSTSHostConfig {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.plugins.hsts.HSTSHostConfig.maxAgeInSeconds)
      */
+    @Deprecated(
+        "Use maxAgeDuration with kotlin.time.Duration instead.",
+        ReplaceWith("maxAgeDuration"),
+        level = DeprecationLevel.WARNING
+    )
     public var maxAgeInSeconds: Long = DEFAULT_HSTS_MAX_AGE
         set(newMaxAge) {
             check(newMaxAge >= 0L) { "maxAgeInSeconds shouldn't be negative: $newMaxAge" }
             field = newMaxAge
+        }
+
+    /**
+     * Specifies how long the client should keep the host in a list of known HSTS hosts.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.plugins.hsts.HSTSHostConfig.maxAgeDuration)
+     */
+    @Suppress("DEPRECATION")
+    public var maxAgeDuration: Duration
+        get() = maxAgeInSeconds.seconds
+        set(newMaxAge) {
+            require(!newMaxAge.isNegative()) { "Only non-negative durations can be specified" }
+            maxAgeInSeconds = newMaxAge.toDouble(DurationUnit.SECONDS).roundToLong()
         }
 
     /**
@@ -104,7 +126,7 @@ internal const val DEFAULT_HSTS_MAX_AGE: Long = 365L * 24 * 3600 // 365 days
 public val HSTS: RouteScopedPlugin<HSTSConfig> = createRouteScopedPlugin("HSTS", ::HSTSConfig) {
     fun constructHeaderValue(config: HSTSHostConfig) = buildString {
         append("max-age=")
-        append(config.maxAgeInSeconds)
+        append(config.maxAgeDuration.inWholeSeconds)
 
         if (config.includeSubDomains) {
             append("; includeSubDomains")

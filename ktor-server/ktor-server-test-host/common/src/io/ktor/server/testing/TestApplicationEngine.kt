@@ -23,6 +23,8 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.io.encoding.Base64
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(InternalAPI::class)
 @PublicAPICandidate("2.2.0")
@@ -166,8 +168,8 @@ public class TestApplicationEngine(
         check(testEngineJob.isActive) { "Test engine is already completed" }
         cancellationJob = stopServerOnCancellation(
             applicationProvider(),
-            configuration.shutdownGracePeriod,
-            configuration.shutdownTimeout
+            configuration.shutdownGracePeriodDuration,
+            configuration.shutdownTimeoutDuration
         )
         launch(start = CoroutineStart.UNDISPATCHED) {
             resolvedConnectorsDeferred.complete(resolvedConnectors())
@@ -175,7 +177,7 @@ public class TestApplicationEngine(
         return this
     }
 
-    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+    override fun stop(gracePeriod: Duration, timeout: Duration) {
         try {
             cancellationJob?.complete()
             client.close()
@@ -184,6 +186,18 @@ public class TestApplicationEngine(
         } finally {
             testEngineJob.cancel()
         }
+    }
+
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
     }
 
     internal suspend fun handleRequest(

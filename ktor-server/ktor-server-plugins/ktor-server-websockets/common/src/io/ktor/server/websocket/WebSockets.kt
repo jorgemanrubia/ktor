@@ -41,7 +41,17 @@ internal val LOGGER = KtorSimpleLogger("io.ktor.server.websocket.WebSockets")
  * @param channelsConfig configuration for the I/O channels.
  */
 public class WebSockets private constructor(
+    @Deprecated(
+        "Use pingInterval with kotlin.time.Duration instead.",
+        ReplaceWith("pingInterval"),
+        level = DeprecationLevel.WARNING
+    )
     public val pingIntervalMillis: Long,
+    @Deprecated(
+        "Use timeout with kotlin.time.Duration instead.",
+        ReplaceWith("timeout"),
+        level = DeprecationLevel.WARNING
+    )
     public val timeoutMillis: Long,
     public val maxFrameSize: Long,
     public val masking: Boolean,
@@ -51,6 +61,14 @@ public class WebSockets private constructor(
 ) : CoroutineScope {
     private val parent: CompletableJob = Job()
 
+    @Deprecated(
+        "Use the WebSockets(pingInterval, timeout, maxFrameSize, masking) factory with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "WebSockets(pingIntervalMillis.milliseconds, timeoutMillis.milliseconds, maxFrameSize, masking)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public constructor(
         pingIntervalMillis: Long,
         timeoutMillis: Long,
@@ -62,7 +80,9 @@ public class WebSockets private constructor(
         get() = parent
 
     init {
+        @Suppress("DEPRECATION")
         require(pingIntervalMillis >= 0)
+        @Suppress("DEPRECATION")
         require(timeoutMillis >= 0)
         require(maxFrameSize > 0)
     }
@@ -88,6 +108,11 @@ public class WebSockets private constructor(
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.websocket.WebSockets.WebSocketOptions.pingPeriodMillis)
          */
+        @Deprecated(
+            "Use pingPeriod with kotlin.time.Duration instead.",
+            ReplaceWith("pingPeriod"),
+            level = DeprecationLevel.WARNING
+        )
         public var pingPeriodMillis: Long = PINGER_DISABLED
 
         /**
@@ -95,6 +120,11 @@ public class WebSockets private constructor(
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.websocket.WebSockets.WebSocketOptions.timeoutMillis)
          */
+        @Deprecated(
+            "Use timeout with kotlin.time.Duration instead.",
+            ReplaceWith("timeout"),
+            level = DeprecationLevel.WARNING
+        )
         public var timeoutMillis: Long = 15_000L
 
         /**
@@ -169,8 +199,8 @@ public class WebSockets private constructor(
             val config = WebSocketOptions().also(configure)
             with(config) {
                 val webSockets = WebSockets(
-                    pingPeriodMillis,
-                    timeoutMillis,
+                    pingPeriod?.inWholeMilliseconds ?: PINGER_DISABLED,
+                    timeout.inWholeMilliseconds,
                     maxFrameSize,
                     masking,
                     extensionsConfig,

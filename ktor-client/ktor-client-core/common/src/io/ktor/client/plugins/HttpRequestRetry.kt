@@ -19,6 +19,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableJob
 import kotlin.math.pow
 import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 private val LOGGER = KtorSimpleLogger("io.ktor.client.plugins.HttpRequestRetry")
 
@@ -74,7 +78,7 @@ public class HttpRequestRetryConfig {
 
     init {
         retryOnExceptionOrServerErrors(3)
-        exponentialDelay()
+        exponentialDelay(1.seconds)
     }
 
     /**
@@ -171,21 +175,62 @@ public class HttpRequestRetryConfig {
 
     /**
      * Specifies delay logic for retries. The [block] accepts the number of retries
-     * and should return the number of milliseconds to wait before retrying.
+     * and should return the [Duration] to wait before retrying.
      *
-     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpRequestRetryConfig.delayMillis)
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpRequestRetryConfig.retryDelay)
      */
-    public fun delayMillis(
+    public fun retryDelay(
         respectRetryAfterHeader: Boolean = true,
-        block: HttpRetryDelayContext.(retry: Int) -> Long
+        block: HttpRetryDelayContext.(retry: Int) -> Duration
     ) {
         delayMillis = {
             if (respectRetryAfterHeader) {
                 val retryAfter = response?.headers?.get(HttpHeaders.RetryAfter)?.toLongOrNull()?.times(1000)
-                maxOf(block(it), retryAfter ?: 0)
+                maxOf(block(it).inWholeMilliseconds, retryAfter ?: 0)
             } else {
-                block(it)
+                block(it).inWholeMilliseconds
             }
+        }
+    }
+
+    /**
+     * Specifies delay logic for retries. The [block] accepts the number of retries
+     * and should return the number of milliseconds to wait before retrying.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpRequestRetryConfig.delayMillis)
+     */
+    @Deprecated(
+        "Use retryDelay with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "retryDelay(respectRetryAfterHeader) { block(it).milliseconds }",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    public fun delayMillis(
+        respectRetryAfterHeader: Boolean = true,
+        block: HttpRetryDelayContext.(retry: Int) -> Long
+    ) {
+        retryDelay(respectRetryAfterHeader) { block(it).milliseconds }
+    }
+
+    /**
+     * Specifies a constant delay between retries.
+     * This delay equals to `delay + [0..randomization]`.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpRequestRetryConfig.constantDelay)
+     */
+    public fun constantDelay(
+        delay: Duration,
+        randomization: Duration = 1.seconds,
+        respectRetryAfterHeader: Boolean = true
+    ) {
+        check(delay.isPositive())
+        check(!randomization.isNegative())
+
+        val randomizationMs = randomization.inWholeMilliseconds
+        retryDelay(respectRetryAfterHeader) {
+            delay + randomMs(randomizationMs).milliseconds
         }
     }
 
@@ -195,6 +240,14 @@ public class HttpRequestRetryConfig {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpRequestRetryConfig.constantDelay)
      */
+    @Deprecated(
+        "Use constantDelay with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "constantDelay(millis.milliseconds, randomizationMs.milliseconds, respectRetryAfterHeader)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public fun constantDelay(
         millis: Long = 1000,
         randomizationMs: Long = 1000,
@@ -203,8 +256,36 @@ public class HttpRequestRetryConfig {
         check(millis > 0)
         check(randomizationMs >= 0)
 
-        delayMillis(respectRetryAfterHeader) {
-            millis + randomMs(randomizationMs)
+        constantDelay(millis.milliseconds, randomizationMs.milliseconds, respectRetryAfterHeader)
+    }
+
+    /**
+     * Specifies an exponential delay between retries, which is calculated using the Exponential backoff algorithm.
+     * This delay equals to `base ^ (retryCount-1) * baseDelay + [0..randomization]`.
+     *
+     * For the defaults (base delay 1 second, base 2), this results in 1s, 2s, 4s, 8s ... plus a random
+     * value up to 1 second.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpRequestRetryConfig.exponentialDelay)
+     */
+    public fun exponentialDelay(
+        baseDelay: Duration,
+        base: Double = 2.0,
+        maxDelay: Duration = 1.minutes,
+        randomization: Duration = 1.seconds,
+        respectRetryAfterHeader: Boolean = true
+    ) {
+        check(base > 0)
+        check(baseDelay.isPositive())
+        check(maxDelay.isPositive())
+        check(!randomization.isNegative())
+
+        val baseDelayMs = baseDelay.inWholeMilliseconds
+        val maxDelayMs = maxDelay.inWholeMilliseconds
+        val randomizationMs = randomization.inWholeMilliseconds
+        retryDelay(respectRetryAfterHeader) { retry ->
+            val delay = minOf((base.pow(retry - 1) * baseDelayMs).toLong(), maxDelayMs)
+            (delay + randomMs(randomizationMs)).milliseconds
         }
     }
 
@@ -217,6 +298,17 @@ public class HttpRequestRetryConfig {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpRequestRetryConfig.exponentialDelay)
      */
+    @Deprecated(
+        "Use exponentialDelay with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "exponentialDelay(" +
+                "baseDelayMs.milliseconds, base, maxDelayMs.milliseconds, randomizationMs.milliseconds, " +
+                "respectRetryAfterHeader" +
+                ")",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public fun exponentialDelay(
         base: Double = 2.0,
         baseDelayMs: Long = 1000,
@@ -229,10 +321,13 @@ public class HttpRequestRetryConfig {
         check(maxDelayMs > 0)
         check(randomizationMs >= 0)
 
-        delayMillis(respectRetryAfterHeader) { retry ->
-            val delay = minOf((base.pow(retry - 1) * baseDelayMs).toLong(), maxDelayMs)
-            delay + randomMs(randomizationMs)
-        }
+        exponentialDelay(
+            baseDelayMs.milliseconds,
+            base,
+            maxDelayMs.milliseconds,
+            randomizationMs.milliseconds,
+            respectRetryAfterHeader
+        )
     }
 
     /**
@@ -265,7 +360,7 @@ public class HttpRequestRetryConfig {
  *      maxRetries = 5
  *      retryIf { request, response -> !response.status.isSuccess() }
  *      retryOnExceptionIf { request, cause -> cause is NetworkError }
- *      delayMillis { retry -> retry * 3000 } // will retry in 3, 6, 9, etc. seconds
+ *      retryDelay { retry -> (retry * 3).seconds } // will retry in 3, 6, 9, etc. seconds
  *      modifyRequest { it.headers.append("X_RETRY_COUNT", retryCount.toString()) }
  * }
  * ```

@@ -66,6 +66,6 @@ internal class JettyHttp2Engine(
  * Update [HTTP2Client] to use connect and socket timeouts specified by [HttpTimeout] plugin.
  */
 private fun HTTP2Client.setupTimeoutAttributes(timeoutAttributes: HttpTimeoutConfig?) {
-    timeoutAttributes?.connectTimeoutMillis?.let { connectTimeout = it }
-    timeoutAttributes?.socketTimeoutMillis?.let { idleTimeout = it }
+    timeoutAttributes?.connectTimeout?.inWholeMilliseconds?.let { connectTimeout = it }
+    timeoutAttributes?.socketTimeout?.inWholeMilliseconds?.let { idleTimeout = it }
 }

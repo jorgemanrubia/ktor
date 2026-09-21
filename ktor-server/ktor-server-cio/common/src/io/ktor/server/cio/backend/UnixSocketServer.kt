@@ -41,7 +41,7 @@ public fun CoroutineScope.unixSocketServer(
     }
 
     val selector = SelectorManager(coroutineContext)
-    val timeout = settings.connectionIdleTimeoutSeconds.seconds
+    val timeout = settings.connectionIdleTimeout
 
     val acceptJob = launch(serverJob + CoroutineName("accept-$settings")) {
         val socketFile = Path(settings.socketPath)

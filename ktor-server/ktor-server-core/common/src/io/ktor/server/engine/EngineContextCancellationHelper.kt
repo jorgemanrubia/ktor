@@ -8,21 +8,55 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.internal.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+
+/**
+ * Stop server on job cancellation with the default grace period of 50 milliseconds and timeout of 5 seconds.
+ * The returned [CompletableJob] needs to be completed or cancelled.
+ *
+ * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.stopServerOnCancellation)
+ */
+public fun ApplicationEngine.stopServerOnCancellation(application: Application): CompletableJob =
+    stopServerOnCancellation(application, 50.milliseconds, 5.seconds)
+
+/**
+ * Stop server on job cancellation. The returned [CompletableJob] needs to be completed or cancelled.
+ *
+ * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.stopServerOnCancellation)
+ *
+ * @param gracePeriod the maximum amount of time for activity to cool down
+ * @param timeout the maximum amount of time to wait until a server stops gracefully
+ */
+@OptIn(InternalAPI::class)
+public fun ApplicationEngine.stopServerOnCancellation(
+    application: Application,
+    gracePeriod: Duration,
+    timeout: Duration = 5.seconds
+): CompletableJob =
+    application.parentCoroutineContext[Job]?.launchOnCancellation {
+        stop(gracePeriod, timeout)
+    } ?: Job()
 
 /**
  * Stop server on job cancellation. The returned [CompletableJob] needs to be completed or cancelled.
  *
  * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.stopServerOnCancellation)
  */
-@OptIn(InternalAPI::class)
+@Deprecated(
+    "Use stopServerOnCancellation(application, gracePeriod, timeout) with kotlin.time.Duration instead.",
+    ReplaceWith(
+        "stopServerOnCancellation(application, gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+        "kotlin.time.Duration.Companion.milliseconds"
+    ),
+    level = DeprecationLevel.WARNING
+)
 public fun ApplicationEngine.stopServerOnCancellation(
     application: Application,
     gracePeriodMillis: Long = 50,
     timeoutMillis: Long = 5000
-): CompletableJob =
-    application.parentCoroutineContext[Job]?.launchOnCancellation {
-        stop(gracePeriodMillis, timeoutMillis)
-    } ?: Job()
+): CompletableJob = stopServerOnCancellation(application, gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
 
 /**
  * Launch a coroutine with [block] body when either the parent job or the returned job is cancelled.

@@ -8,6 +8,7 @@ import java.io.Closeable
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Creates a storage that serializes a session's data to a file under the [rootDir] directory.
@@ -17,7 +18,7 @@ import java.io.IOException
  * @see [Sessions]
  */
 public fun directorySessionStorage(rootDir: File, cached: Boolean = true): SessionStorage = when (cached) {
-    true -> CacheStorage(DirectoryStorage(rootDir), 60000)
+    true -> CacheStorage(DirectoryStorage(rootDir), 60.seconds)
     false -> DirectoryStorage(rootDir)
 }
 

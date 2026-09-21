@@ -38,7 +38,7 @@ internal class Endpoint(
     private val lastActivity = atomic(getTimeMillis())
     private val connections: AtomicInt = atomic(0)
     private val deliveryPoint: Channel<RequestTask> = Channel()
-    private val maxEndpointIdleTime: Long = 2 * config.endpoint.connectTimeout
+    private val maxEndpointIdleTime: Long = 2 * config.endpoint.connectTimeoutDuration.inWholeMilliseconds
 
     private val timeout = launch(coroutineContext + CoroutineName("cio-endpoint-timeout")) {
         try {
@@ -184,7 +184,7 @@ internal class Endpoint(
         val (address, connection) = connect(request)
 
         val pipeline = ConnectionPipeline(
-            config.endpoint.keepAliveTime,
+            config.endpoint.keepAliveDuration.inWholeMilliseconds,
             config.endpoint.pipelineMaxSize,
             connection,
             proxy != null,
@@ -302,12 +302,13 @@ internal class Endpoint(
      * connection timeout and socket timeout to be applied.
      */
     private fun retrieveTimeouts(requestData: HttpRequestData): Pair<Long, Long> {
-        val default = config.endpoint.connectTimeout to config.endpoint.socketTimeout
+        val defaultConnectTimeout = config.endpoint.connectTimeoutDuration.inWholeMilliseconds
+        val defaultSocketTimeout = config.endpoint.socketTimeoutDuration.inWholeMilliseconds
         val timeoutAttributes = requestData.getCapabilityOrNull(HttpTimeoutCapability)
-            ?: return default
+            ?: return defaultConnectTimeout to defaultSocketTimeout
 
-        val socketTimeout = timeoutAttributes.socketTimeoutMillis ?: config.endpoint.socketTimeout
-        val connectTimeout = timeoutAttributes.connectTimeoutMillis ?: config.endpoint.connectTimeout
+        val socketTimeout = timeoutAttributes.socketTimeout?.inWholeMilliseconds ?: defaultSocketTimeout
+        val connectTimeout = timeoutAttributes.connectTimeout?.inWholeMilliseconds ?: defaultConnectTimeout
         return connectTimeout to socketTimeout
     }
 
@@ -360,5 +361,6 @@ internal fun getRequestTimeout(
         return HttpTimeoutConfig.INFINITE_TIMEOUT_MS
     }
 
-    return engineConfig.requestTimeout
+    val requestTimeout = engineConfig.requestTimeoutDuration
+    return if (requestTimeout.isInfinite()) 0L else requestTimeout.inWholeMilliseconds
 }

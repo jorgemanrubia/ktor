@@ -13,6 +13,7 @@ import kotlin.time.Duration.Companion.seconds
  *
  * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.plugins.cors.maxAgeDuration)
  */
+@Suppress("DEPRECATION")
 public var CORSConfig.maxAgeDuration: Duration
     get() = maxAgeInSeconds.seconds
     set(newMaxAge) {

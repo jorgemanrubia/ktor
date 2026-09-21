@@ -8,6 +8,7 @@ import io.ktor.server.application.*
 import io.ktor.server.config.*
 import io.ktor.util.*
 import io.ktor.util.logging.*
+import kotlin.time.Duration.Companion.milliseconds
 
 public class CommandLineConfig(
     public val rootConfig: ServerConfig,
@@ -169,10 +170,10 @@ public fun ApplicationEngine.Configuration.loadCommonConfiguration(deploymentCon
         workerGroupSize = it
     }
     deploymentConfig.propertyOrNull("shutdownGracePeriod")?.getString()?.toLong()?.let {
-        shutdownGracePeriod = it
+        shutdownGracePeriodDuration = it.milliseconds
     }
     deploymentConfig.propertyOrNull("shutdownTimeout")?.getString()?.toLong()?.let {
-        shutdownTimeout = it
+        shutdownTimeoutDuration = it.milliseconds
     }
 }
 

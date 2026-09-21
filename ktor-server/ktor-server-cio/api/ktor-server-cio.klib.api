@@ -48,13 +48,18 @@ final class io.ktor.server.cio/CIOApplicationEngine : io.ktor.server.engine/Base
         final fun <get-configuration>(): io.ktor.server.cio/CIOApplicationEngine.Configuration // io.ktor.server.cio/CIOApplicationEngine.configuration.<get-configuration>|<get-configuration>(){}[0]
 
     final fun start(kotlin/Boolean): io.ktor.server.engine/ApplicationEngine // io.ktor.server.cio/CIOApplicationEngine.start|start(kotlin.Boolean){}[0]
+    final fun stop(kotlin.time/Duration, kotlin.time/Duration) // io.ktor.server.cio/CIOApplicationEngine.stop|stop(kotlin.time.Duration;kotlin.time.Duration){}[0]
     final fun stop(kotlin/Long, kotlin/Long) // io.ktor.server.cio/CIOApplicationEngine.stop|stop(kotlin.Long;kotlin.Long){}[0]
     final suspend fun startSuspend(kotlin/Boolean): io.ktor.server.engine/ApplicationEngine // io.ktor.server.cio/CIOApplicationEngine.startSuspend|startSuspend(kotlin.Boolean){}[0]
+    final suspend fun stopSuspend(kotlin.time/Duration, kotlin.time/Duration) // io.ktor.server.cio/CIOApplicationEngine.stopSuspend|stopSuspend(kotlin.time.Duration;kotlin.time.Duration){}[0]
     final suspend fun stopSuspend(kotlin/Long, kotlin/Long) // io.ktor.server.cio/CIOApplicationEngine.stopSuspend|stopSuspend(kotlin.Long;kotlin.Long){}[0]
 
     final class Configuration : io.ktor.server.engine/BaseApplicationEngine.Configuration { // io.ktor.server.cio/CIOApplicationEngine.Configuration|null[0]
         constructor <init>() // io.ktor.server.cio/CIOApplicationEngine.Configuration.<init>|<init>(){}[0]
 
+        final var connectionIdleTimeout // io.ktor.server.cio/CIOApplicationEngine.Configuration.connectionIdleTimeout|{}connectionIdleTimeout[0]
+            final fun <get-connectionIdleTimeout>(): kotlin.time/Duration // io.ktor.server.cio/CIOApplicationEngine.Configuration.connectionIdleTimeout.<get-connectionIdleTimeout>|<get-connectionIdleTimeout>(){}[0]
+            final fun <set-connectionIdleTimeout>(kotlin.time/Duration) // io.ktor.server.cio/CIOApplicationEngine.Configuration.connectionIdleTimeout.<set-connectionIdleTimeout>|<set-connectionIdleTimeout>(kotlin.time.Duration){}[0]
         final var connectionIdleTimeoutSeconds // io.ktor.server.cio/CIOApplicationEngine.Configuration.connectionIdleTimeoutSeconds|{}connectionIdleTimeoutSeconds[0]
             final fun <get-connectionIdleTimeoutSeconds>(): kotlin/Int // io.ktor.server.cio/CIOApplicationEngine.Configuration.connectionIdleTimeoutSeconds.<get-connectionIdleTimeoutSeconds>|<get-connectionIdleTimeoutSeconds>(){}[0]
             final fun <set-connectionIdleTimeoutSeconds>(kotlin/Int) // io.ktor.server.cio/CIOApplicationEngine.Configuration.connectionIdleTimeoutSeconds.<set-connectionIdleTimeoutSeconds>|<set-connectionIdleTimeoutSeconds>(kotlin.Int){}[0]
@@ -76,8 +81,11 @@ final class io.ktor.server.cio/HttpServer { // io.ktor.server.cio/HttpServer|nul
 }
 
 final class io.ktor.server.cio/HttpServerSettings { // io.ktor.server.cio/HttpServerSettings|null[0]
+    constructor <init>() // io.ktor.server.cio/HttpServerSettings.<init>|<init>(){}[0]
     constructor <init>(kotlin/String = ..., kotlin/Int = ..., kotlin/Long = ..., kotlin/Boolean = ...) // io.ktor.server.cio/HttpServerSettings.<init>|<init>(kotlin.String;kotlin.Int;kotlin.Long;kotlin.Boolean){}[0]
 
+    final val connectionIdleTimeout // io.ktor.server.cio/HttpServerSettings.connectionIdleTimeout|{}connectionIdleTimeout[0]
+        final fun <get-connectionIdleTimeout>(): kotlin.time/Duration // io.ktor.server.cio/HttpServerSettings.connectionIdleTimeout.<get-connectionIdleTimeout>|<get-connectionIdleTimeout>(){}[0]
     final val connectionIdleTimeoutSeconds // io.ktor.server.cio/HttpServerSettings.connectionIdleTimeoutSeconds|{}connectionIdleTimeoutSeconds[0]
         final fun <get-connectionIdleTimeoutSeconds>(): kotlin/Long // io.ktor.server.cio/HttpServerSettings.connectionIdleTimeoutSeconds.<get-connectionIdleTimeoutSeconds>|<get-connectionIdleTimeoutSeconds>(){}[0]
     final val host // io.ktor.server.cio/HttpServerSettings.host|{}host[0]
@@ -111,8 +119,11 @@ final class io.ktor.server.cio/UnixSocketConnectorBuilder : io.ktor.server.cio/U
 }
 
 final class io.ktor.server.cio/UnixSocketServerSettings { // io.ktor.server.cio/UnixSocketServerSettings|null[0]
+    constructor <init>(kotlin/String) // io.ktor.server.cio/UnixSocketServerSettings.<init>|<init>(kotlin.String){}[0]
     constructor <init>(kotlin/String, kotlin/Long = ...) // io.ktor.server.cio/UnixSocketServerSettings.<init>|<init>(kotlin.String;kotlin.Long){}[0]
 
+    final val connectionIdleTimeout // io.ktor.server.cio/UnixSocketServerSettings.connectionIdleTimeout|{}connectionIdleTimeout[0]
+        final fun <get-connectionIdleTimeout>(): kotlin.time/Duration // io.ktor.server.cio/UnixSocketServerSettings.connectionIdleTimeout.<get-connectionIdleTimeout>|<get-connectionIdleTimeout>(){}[0]
     final val connectionIdleTimeoutSeconds // io.ktor.server.cio/UnixSocketServerSettings.connectionIdleTimeoutSeconds|{}connectionIdleTimeoutSeconds[0]
         final fun <get-connectionIdleTimeoutSeconds>(): kotlin/Long // io.ktor.server.cio/UnixSocketServerSettings.connectionIdleTimeoutSeconds.<get-connectionIdleTimeoutSeconds>|<get-connectionIdleTimeoutSeconds>(){}[0]
     final val socketPath // io.ktor.server.cio/UnixSocketServerSettings.socketPath|{}socketPath[0]
@@ -133,3 +144,5 @@ final fun (io.ktor.server.engine/ApplicationEngine.Configuration).io.ktor.server
 final fun (kotlinx.coroutines/CoroutineScope).io.ktor.server.cio.backend/httpServer(io.ktor.server.cio/HttpServerSettings, kotlin.coroutines/SuspendFunction2<io.ktor.server.cio.backend/ServerRequestScope, io.ktor.http.cio/Request, kotlin/Unit>): io.ktor.server.cio/HttpServer // io.ktor.server.cio.backend/httpServer|httpServer@kotlinx.coroutines.CoroutineScope(io.ktor.server.cio.HttpServerSettings;kotlin.coroutines.SuspendFunction2<io.ktor.server.cio.backend.ServerRequestScope,io.ktor.http.cio.Request,kotlin.Unit>){}[0]
 final fun (kotlinx.coroutines/CoroutineScope).io.ktor.server.cio.backend/startServerConnectionPipeline(io.ktor.server.cio.backend/ServerIncomingConnection, kotlin.time/Duration, kotlin.coroutines/SuspendFunction2<io.ktor.server.cio.backend/ServerRequestScope, io.ktor.http.cio/Request, kotlin/Unit>): kotlinx.coroutines/Job // io.ktor.server.cio.backend/startServerConnectionPipeline|startServerConnectionPipeline@kotlinx.coroutines.CoroutineScope(io.ktor.server.cio.backend.ServerIncomingConnection;kotlin.time.Duration;kotlin.coroutines.SuspendFunction2<io.ktor.server.cio.backend.ServerRequestScope,io.ktor.http.cio.Request,kotlin.Unit>){}[0]
 final fun (kotlinx.coroutines/CoroutineScope).io.ktor.server.cio.backend/unixSocketServer(io.ktor.server.cio/UnixSocketServerSettings, kotlin.coroutines/SuspendFunction2<io.ktor.server.cio.backend/ServerRequestScope, io.ktor.http.cio/Request, kotlin/Unit>): io.ktor.server.cio/HttpServer // io.ktor.server.cio.backend/unixSocketServer|unixSocketServer@kotlinx.coroutines.CoroutineScope(io.ktor.server.cio.UnixSocketServerSettings;kotlin.coroutines.SuspendFunction2<io.ktor.server.cio.backend.ServerRequestScope,io.ktor.http.cio.Request,kotlin.Unit>){}[0]
+final fun io.ktor.server.cio/HttpServerSettings(kotlin/String = ..., kotlin/Int = ..., kotlin.time/Duration, kotlin/Boolean = ...): io.ktor.server.cio/HttpServerSettings // io.ktor.server.cio/HttpServerSettings|HttpServerSettings(kotlin.String;kotlin.Int;kotlin.time.Duration;kotlin.Boolean){}[0]
+final fun io.ktor.server.cio/UnixSocketServerSettings(kotlin/String, kotlin.time/Duration): io.ktor.server.cio/UnixSocketServerSettings // io.ktor.server.cio/UnixSocketServerSettings|UnixSocketServerSettings(kotlin.String;kotlin.time.Duration){}[0]

@@ -137,6 +137,11 @@ public class CORSConfig {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.plugins.cors.CORSConfig.maxAgeInSeconds)
      */
+    @Deprecated(
+        "Use maxAgeDuration with kotlin.time.Duration instead.",
+        ReplaceWith("maxAgeDuration"),
+        level = DeprecationLevel.WARNING
+    )
     public var maxAgeInSeconds: Long = CORS_DEFAULT_MAX_AGE
         set(newMaxAge) {
             check(newMaxAge >= 0L) { "maxAgeInSeconds shouldn't be negative: $newMaxAge" }

@@ -79,6 +79,7 @@ public final class io/ktor/server/netty/NettyApplicationEngine : io/ktor/server/
 	public synthetic fun start (Z)Lio/ktor/server/engine/ApplicationEngine;
 	public fun start (Z)Lio/ktor/server/netty/NettyApplicationEngine;
 	public fun stop (JJ)V
+	public fun stop-QTBD994 (JJ)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -95,7 +96,9 @@ public final class io/ktor/server/netty/NettyApplicationEngine$Configuration : i
 	public final fun getMaxChunkSize ()I
 	public final fun getMaxHeaderSize ()I
 	public final fun getMaxInitialLineLength ()I
+	public final fun getRequestReadTimeout-UwyO8pc ()J
 	public final fun getRequestReadTimeoutSeconds ()I
+	public final fun getResponseWriteTimeout-UwyO8pc ()J
 	public final fun getResponseWriteTimeoutSeconds ()I
 	public final fun getRunningLimit ()I
 	public final fun getShareWorkGroup ()Z
@@ -109,7 +112,9 @@ public final class io/ktor/server/netty/NettyApplicationEngine$Configuration : i
 	public final fun setMaxChunkSize (I)V
 	public final fun setMaxHeaderSize (I)V
 	public final fun setMaxInitialLineLength (I)V
+	public final fun setRequestReadTimeout-LRDsOJo (J)V
 	public final fun setRequestReadTimeoutSeconds (I)V
+	public final fun setResponseWriteTimeout-LRDsOJo (J)V
 	public final fun setResponseWriteTimeoutSeconds (I)V
 	public final fun setRunningLimit (I)V
 	public final fun setShareWorkGroup (Z)V

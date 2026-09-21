@@ -4,6 +4,10 @@
 
 package io.ktor.network.sockets
 
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+
 private const val INFINITE_TIMEOUT_MS = Long.MAX_VALUE
 
 /**
@@ -189,12 +193,29 @@ public sealed class SocketOptions(
         public var noDelay: Boolean = true
 
         /**
+         * SO_LINGER option applied at socket close, not recommended to set to zero however useful for debugging.
+         * `null` is the default and means that it is not set and system-dependant.
+         *
+         * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.network.sockets.SocketOptions.TCPClientSocketOptions.linger)
+         */
+        public var linger: Duration? = null
+
+        /**
          * SO_LINGER option applied at socket close, not recommended to set to 0 however useful for debugging
          * Value of `-1` is the default and means that it is not set and system-dependant
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.network.sockets.SocketOptions.TCPClientSocketOptions.lingerSeconds)
          */
-        public var lingerSeconds: Int = -1
+        @Deprecated(
+            "Use linger with kotlin.time.Duration instead.",
+            ReplaceWith("linger"),
+            level = DeprecationLevel.WARNING
+        )
+        public var lingerSeconds: Int
+            get() = linger?.inWholeSeconds?.toInt() ?: -1
+            set(value) {
+                linger = if (value < 0) null else value.seconds
+            }
 
         /**
          * SO_KEEPALIVE option is to enable/disable TCP keep-alive
@@ -204,17 +225,33 @@ public sealed class SocketOptions(
         public var keepAlive: Boolean? = null
 
         /**
-         * Socket timeout (read and write).
+         * Socket timeout (read and write). Use [Duration.INFINITE] to disable the timeout.
+         *
+         * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.network.sockets.SocketOptions.TCPClientSocketOptions.socketTimeoutDuration)
+         */
+        public var socketTimeoutDuration: Duration = Duration.INFINITE
+
+        /**
+         * Socket timeout (read and write) in milliseconds.
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.network.sockets.SocketOptions.TCPClientSocketOptions.socketTimeout)
          */
-        public var socketTimeout: Long = INFINITE_TIMEOUT_MS
+        @Deprecated(
+            "Use socketTimeoutDuration with kotlin.time.Duration instead.",
+            ReplaceWith("socketTimeoutDuration"),
+            level = DeprecationLevel.WARNING
+        )
+        public var socketTimeout: Long
+            get() = socketTimeoutDuration.inWholeMilliseconds
+            set(value) {
+                socketTimeoutDuration = if (value == INFINITE_TIMEOUT_MS) Duration.INFINITE else value.milliseconds
+            }
 
         override fun copyCommon(from: SocketOptions) {
             super.copyCommon(from)
             if (from is TCPClientSocketOptions) {
                 noDelay = from.noDelay
-                lingerSeconds = from.lingerSeconds
+                linger = from.linger
                 keepAlive = from.keepAlive
             }
         }

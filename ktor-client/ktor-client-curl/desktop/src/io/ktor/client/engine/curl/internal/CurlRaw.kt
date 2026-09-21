@@ -35,7 +35,7 @@ internal suspend fun HttpRequestData.toCurlRequest(
     proxy = config.proxy,
     content = body.toByteChannel(),
     contentLength = body.contentLength ?: headers[HttpHeaders.ContentLength]?.toLongOrNull() ?: -1L,
-    connectTimeout = getCapabilityOrNull(HttpTimeoutCapability)?.connectTimeoutMillis,
+    connectTimeout = getCapabilityOrNull(HttpTimeoutCapability)?.connectTimeout?.inWholeMilliseconds,
     callContext = callContext,
     isUpgradeRequest = isUpgradeRequest(),
     forceProxyTunneling = config.forceProxyTunneling,

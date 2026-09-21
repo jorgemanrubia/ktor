@@ -7,6 +7,7 @@ package io.ktor.server.cio
 import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import kotlin.jvm.JvmStatic
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Default engine with main function that starts CIO engine using application.conf
@@ -48,7 +49,7 @@ public object EngineMain {
         val deploymentConfig = config.config("ktor.deployment")
         loadCommonConfiguration(deploymentConfig)
         deploymentConfig.propertyOrNull("connectionIdleTimeoutSeconds")?.getString()?.toInt()?.let {
-            connectionIdleTimeoutSeconds = it
+            connectionIdleTimeout = it.seconds
         }
     }
 }

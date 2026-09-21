@@ -16,6 +16,7 @@ import org.slf4j.*
 import javax.servlet.*
 import javax.servlet.annotation.*
 import kotlin.coroutines.*
+import kotlin.time.Duration
 
 /**
  * This servlet need to be installed into a servlet container
@@ -162,6 +163,9 @@ private object EmptyEngineFactory : ApplicationEngineFactory<ApplicationEngine, 
             override val environment: ApplicationEnvironment = environment
             override suspend fun resolvedConnectors(): List<EngineConnectorConfig> = emptyList()
             override fun start(wait: Boolean): ApplicationEngine = this
+            override fun stop(gracePeriod: Duration, timeout: Duration) = Unit
+
+            @Suppress("OVERRIDE_DEPRECATION")
             override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) = Unit
         }
     }

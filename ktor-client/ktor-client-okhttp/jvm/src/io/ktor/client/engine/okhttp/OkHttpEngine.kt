@@ -262,10 +262,10 @@ internal fun OutgoingContent.convertToOkHttpBody(
 private fun OkHttpClient.Builder.setupTimeoutAttributes(
     timeoutAttributes: HttpTimeoutConfig
 ): OkHttpClient.Builder {
-    timeoutAttributes.connectTimeoutMillis?.let {
+    timeoutAttributes.connectTimeout?.inWholeMilliseconds?.let {
         connectTimeout(convertLongTimeoutToLongWithInfiniteAsZero(it), TimeUnit.MILLISECONDS)
     }
-    timeoutAttributes.socketTimeoutMillis?.let {
+    timeoutAttributes.socketTimeout?.inWholeMilliseconds?.let {
         readTimeout(convertLongTimeoutToLongWithInfiniteAsZero(it), TimeUnit.MILLISECONDS)
         writeTimeout(convertLongTimeoutToLongWithInfiniteAsZero(it), TimeUnit.MILLISECONDS)
     }

@@ -18,6 +18,9 @@ import io.ktor.util.pipeline.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import kotlin.concurrent.Volatile
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Engine that based on CIO backend
@@ -39,12 +42,29 @@ public class CIOApplicationEngine(
      */
     public class Configuration : BaseApplicationEngine.Configuration() {
         /**
+         * The time that the server will keep HTTP IDLE connections open.
+         * A connection is IDLE if there are no active requests running.
+         *
+         * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.cio.CIOApplicationEngine.Configuration.connectionIdleTimeout)
+         */
+        public var connectionIdleTimeout: Duration = 45.seconds
+
+        /**
          * Number of seconds that the server will keep HTTP IDLE connections open.
          * A connection is IDLE if there are no active requests running.
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.cio.CIOApplicationEngine.Configuration.connectionIdleTimeoutSeconds)
          */
-        public var connectionIdleTimeoutSeconds: Int = 45
+        @Deprecated(
+            "Use connectionIdleTimeout with kotlin.time.Duration instead.",
+            ReplaceWith("connectionIdleTimeout"),
+            level = DeprecationLevel.WARNING
+        )
+        public var connectionIdleTimeoutSeconds: Int
+            get() = connectionIdleTimeout.inWholeSeconds.toInt()
+            set(value) {
+                connectionIdleTimeout = value.seconds
+            }
 
         /**
          * Allow the server to bind to an address that is already in use
@@ -88,10 +108,10 @@ public class CIOApplicationEngine(
 
     override fun start(wait: Boolean): ApplicationEngine = runBlockingBridge { startSuspend(wait) }
 
-    override suspend fun stopSuspend(gracePeriodMillis: Long, timeoutMillis: Long) {
+    override suspend fun stopSuspend(gracePeriod: Duration, timeout: Duration) {
         stopRequest.complete()
 
-        val result = withTimeoutOrNull(gracePeriodMillis) {
+        val result = withTimeoutOrNull(gracePeriod) {
             serverJob.join()
             true
         }
@@ -100,14 +120,38 @@ public class CIOApplicationEngine(
             // timeout
             serverJob.cancel()
 
-            withTimeoutOrNull(timeoutMillis - gracePeriodMillis) {
+            withTimeoutOrNull(timeout - gracePeriod) {
                 serverJob.join()
             }
         }
     }
 
-    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long): Unit = runBlockingBridge {
-        stopSuspend(gracePeriodMillis, timeoutMillis)
+    @Deprecated(
+        "Use stopSuspend(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    override suspend fun stopSuspend(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
+    }
+
+    override fun stop(gracePeriod: Duration, timeout: Duration): Unit = runBlockingBridge {
+        stopSuspend(gracePeriod, timeout)
+    }
+
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
     }
 
     private fun CoroutineScope.startConnector(connectorSpec: EngineConnectorConfig): HttpServer {
@@ -115,7 +159,7 @@ public class CIOApplicationEngine(
             is UnixSocketConnectorConfig -> {
                 val settings = UnixSocketServerSettings(
                     socketPath = connectorSpec.socketPath,
-                    connectionIdleTimeoutSeconds = configuration.connectionIdleTimeoutSeconds.toLong(),
+                    connectionIdleTimeout = configuration.connectionIdleTimeout,
                 )
 
                 unixSocketServer(settings) { request ->
@@ -127,7 +171,7 @@ public class CIOApplicationEngine(
                 val settings = HttpServerSettings(
                     host = connectorSpec.host,
                     port = connectorSpec.port,
-                    connectionIdleTimeoutSeconds = configuration.connectionIdleTimeoutSeconds.toLong(),
+                    connectionIdleTimeout = configuration.connectionIdleTimeout,
                     reuseAddress = configuration.reuseAddress
                 )
 

@@ -13,6 +13,7 @@ import kotlin.time.Duration.Companion.seconds
  *
  * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.plugins.hsts.maxAgeDuration)
  */
+@Suppress("DEPRECATION", "EXTENSION_SHADOWED_BY_MEMBER")
 public var HSTSConfig.maxAgeDuration: Duration
     get() = maxAgeInSeconds.seconds
     set(newMaxAge) {

@@ -103,6 +103,7 @@ final class io.ktor.server.testing/TestApplicationEngine : io.ktor.server.engine
         final fun <set-callInterceptor>(kotlin.coroutines/SuspendFunction2<io.ktor.util.pipeline/PipelineContext<kotlin/Unit, io.ktor.server.application/PipelineCall>, kotlin/Unit, kotlin/Unit>) // io.ktor.server.testing/TestApplicationEngine.callInterceptor.<set-callInterceptor>|<set-callInterceptor>(kotlin.coroutines.SuspendFunction2<io.ktor.util.pipeline.PipelineContext<kotlin.Unit,io.ktor.server.application.PipelineCall>,kotlin.Unit,kotlin.Unit>){}[0]
 
     final fun start(kotlin/Boolean): io.ktor.server.engine/ApplicationEngine // io.ktor.server.testing/TestApplicationEngine.start|start(kotlin.Boolean){}[0]
+    final fun stop(kotlin.time/Duration, kotlin.time/Duration) // io.ktor.server.testing/TestApplicationEngine.stop|stop(kotlin.time.Duration;kotlin.time.Duration){}[0]
     final fun stop(kotlin/Long, kotlin/Long) // io.ktor.server.testing/TestApplicationEngine.stop|stop(kotlin.Long;kotlin.Long){}[0]
     final suspend fun resolvedConnectors(): kotlin.collections/List<io.ktor.server.engine/EngineConnectorConfig> // io.ktor.server.testing/TestApplicationEngine.resolvedConnectors|resolvedConnectors(){}[0]
 

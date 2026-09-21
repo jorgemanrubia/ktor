@@ -148,7 +148,7 @@ internal class JavaHttpWebSocket(
 
         with(builder) {
             requestData.getCapabilityOrNull(HttpTimeoutCapability)?.let { timeoutAttributes ->
-                timeoutAttributes.connectTimeoutMillis?.let {
+                timeoutAttributes.connectTimeout?.inWholeMilliseconds?.let {
                     connectTimeout(Duration.ofMillis(it))
                 }
             }

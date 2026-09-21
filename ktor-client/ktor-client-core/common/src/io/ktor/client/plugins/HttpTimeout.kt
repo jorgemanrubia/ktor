@@ -17,6 +17,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.io.IOException
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 private val LOGGER = KtorSimpleLogger("io.ktor.client.plugins.HttpTimeout")
@@ -29,24 +30,105 @@ private val LOGGER = KtorSimpleLogger("io.ktor.client.plugins.HttpTimeout")
 @KtorDsl
 public class HttpTimeoutConfig {
 
-    private var _requestTimeoutMillis: Long? = 0
-    private var _connectTimeoutMillis: Long? = 0
-    private var _socketTimeoutMillis: Long? = 0
+    private var _requestTimeout: Duration? = null
+    private var _connectTimeout: Duration? = null
+    private var _socketTimeout: Duration? = null
+
+    /**
+     * Creates a new instance of [HttpTimeoutConfig] with no timeouts configured.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpTimeoutConfig.HttpTimeoutConfig)
+     */
+    public constructor()
+
+    /**
+     * Creates a new instance of [HttpTimeoutConfig].
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpTimeoutConfig.HttpTimeoutConfig)
+     *
+     * @param requestTimeout a request timeout or `null` if not configured.
+     * @param connectTimeout a connection timeout or `null` if not configured.
+     * @param socketTimeout a socket timeout or `null` if not configured.
+     */
+    public constructor(
+        requestTimeout: Duration?,
+        connectTimeout: Duration? = null,
+        socketTimeout: Duration? = null
+    ) {
+        this.requestTimeout = requestTimeout
+        this.connectTimeout = connectTimeout
+        this.socketTimeout = socketTimeout
+    }
 
     /**
      * Creates a new instance of [HttpTimeoutConfig].
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpTimeoutConfig.HttpTimeoutConfig)
      */
+    @Deprecated(
+        "Use the constructor with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "HttpTimeoutConfig(" +
+                "requestTimeoutMillis?.milliseconds, " +
+                "connectTimeoutMillis?.milliseconds, " +
+                "socketTimeoutMillis?.milliseconds" +
+                ")",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public constructor(
         requestTimeoutMillis: Long? = null,
         connectTimeoutMillis: Long? = null,
         socketTimeoutMillis: Long? = null
     ) {
-        this.requestTimeoutMillis = requestTimeoutMillis
-        this.connectTimeoutMillis = connectTimeoutMillis
-        this.socketTimeoutMillis = socketTimeoutMillis
+        this.requestTimeout = requestTimeoutMillis?.milliseconds
+        this.connectTimeout = connectTimeoutMillis?.milliseconds
+        this.socketTimeout = socketTimeoutMillis?.milliseconds
     }
+
+    /**
+     * Specifies a request timeout.
+     * The request timeout is the time period required to process an HTTP call: from sending a request to receiving a
+     * response.
+     *
+     * Use [Duration.INFINITE] for an infinite timeout, or `null` to leave the timeout unspecified.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpTimeoutConfig.requestTimeout)
+     */
+    public var requestTimeout: Duration?
+        get() = _requestTimeout
+        set(value) {
+            _requestTimeout = checkTimeoutValue(value)
+        }
+
+    /**
+     * Specifies a connection timeout.
+     * The connection timeout is the time period in which a client should establish a connection with a server.
+     *
+     * Use [Duration.INFINITE] for an infinite timeout, or `null` to leave the timeout unspecified.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpTimeoutConfig.connectTimeout)
+     */
+    public var connectTimeout: Duration?
+        get() = _connectTimeout
+        set(value) {
+            _connectTimeout = checkTimeoutValue(value)
+        }
+
+    /**
+     * Specifies a socket timeout (read and write).
+     * The socket timeout is the maximum time of inactivity between two data packets when exchanging data with a server.
+     *
+     * Use [Duration.INFINITE] for an infinite timeout, or `null` to leave the timeout unspecified.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpTimeoutConfig.socketTimeout)
+     */
+    public var socketTimeout: Duration?
+        get() = _socketTimeout
+        set(value) {
+            _socketTimeout = checkTimeoutValue(value)
+        }
 
     /**
      * Specifies a request timeout in milliseconds.
@@ -55,10 +137,15 @@ public class HttpTimeoutConfig {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpTimeoutConfig.requestTimeoutMillis)
      */
+    @Deprecated(
+        "Use requestTimeout with kotlin.time.Duration instead.",
+        ReplaceWith("requestTimeout"),
+        level = DeprecationLevel.WARNING
+    )
     public var requestTimeoutMillis: Long?
-        get() = _requestTimeoutMillis
+        get() = _requestTimeout?.inWholeMilliseconds
         set(value) {
-            _requestTimeoutMillis = checkTimeoutValue(value)
+            requestTimeout = value?.milliseconds
         }
 
     /**
@@ -67,10 +154,15 @@ public class HttpTimeoutConfig {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpTimeoutConfig.connectTimeoutMillis)
      */
+    @Deprecated(
+        "Use connectTimeout with kotlin.time.Duration instead.",
+        ReplaceWith("connectTimeout"),
+        level = DeprecationLevel.WARNING
+    )
     public var connectTimeoutMillis: Long?
-        get() = _connectTimeoutMillis
+        get() = _connectTimeout?.inWholeMilliseconds
         set(value) {
-            _connectTimeoutMillis = checkTimeoutValue(value)
+            connectTimeout = value?.milliseconds
         }
 
     /**
@@ -79,15 +171,20 @@ public class HttpTimeoutConfig {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.HttpTimeoutConfig.socketTimeoutMillis)
      */
+    @Deprecated(
+        "Use socketTimeout with kotlin.time.Duration instead.",
+        ReplaceWith("socketTimeout"),
+        level = DeprecationLevel.WARNING
+    )
     public var socketTimeoutMillis: Long?
-        get() = _socketTimeoutMillis
+        get() = _socketTimeout?.inWholeMilliseconds
         set(value) {
-            _socketTimeoutMillis = checkTimeoutValue(value)
+            socketTimeout = value?.milliseconds
         }
 
-    private fun checkTimeoutValue(value: Long?): Long? {
-        require(value == null || value > 0) {
-            "Only positive timeout values are allowed, for infinite timeout use HttpTimeoutConfig.INFINITE_TIMEOUT_MS"
+    private fun checkTimeoutValue(value: Duration?): Duration? {
+        require(value == null || value.isPositive()) {
+            "Only positive timeout values are allowed, for infinite timeout use Duration.INFINITE"
         }
         return value
     }
@@ -98,17 +195,17 @@ public class HttpTimeoutConfig {
 
         other as HttpTimeoutConfig
 
-        if (_requestTimeoutMillis != other._requestTimeoutMillis) return false
-        if (_connectTimeoutMillis != other._connectTimeoutMillis) return false
-        if (_socketTimeoutMillis != other._socketTimeoutMillis) return false
+        if (_requestTimeout != other._requestTimeout) return false
+        if (_connectTimeout != other._connectTimeout) return false
+        if (_socketTimeout != other._socketTimeout) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = _requestTimeoutMillis.hashCode()
-        result = 31 * result + _connectTimeoutMillis.hashCode()
-        result = 31 * result + _socketTimeoutMillis.hashCode()
+        var result = _requestTimeout.hashCode()
+        result = 31 * result + _connectTimeout.hashCode()
+        result = 31 * result + _socketTimeout.hashCode()
         return result
     }
 
@@ -135,17 +232,17 @@ public val HttpTimeout: ClientPlugin<HttpTimeoutConfig> = createClientPlugin(
     "HttpTimeout",
     ::HttpTimeoutConfig
 ) {
-    val requestTimeoutMillis: Long? = pluginConfig.requestTimeoutMillis
-    val connectTimeoutMillis: Long? = pluginConfig.connectTimeoutMillis
-    val socketTimeoutMillis: Long? = pluginConfig.socketTimeoutMillis
+    val requestTimeout: Duration? = pluginConfig.requestTimeout
+    val connectTimeout: Duration? = pluginConfig.connectTimeout
+    val socketTimeout: Duration? = pluginConfig.socketTimeout
 
     /**
      * Utils method that return `true` if at least one timeout is configured (has not null value).
      */
     fun hasNotNullTimeouts(supportsRequestTimeout: Boolean) =
-        (supportsRequestTimeout && requestTimeoutMillis != null) ||
-            connectTimeoutMillis != null ||
-            socketTimeoutMillis != null
+        (supportsRequestTimeout && requestTimeout != null) ||
+            connectTimeout != null ||
+            socketTimeout != null
 
     on(Send) { request ->
         val supportsRequestTimeout = request.supportsRequestTimeout
@@ -156,12 +253,12 @@ public val HttpTimeout: ClientPlugin<HttpTimeoutConfig> = createClientPlugin(
         }
 
         configuration?.apply {
-            this.connectTimeoutMillis = this.connectTimeoutMillis ?: connectTimeoutMillis
-            this.socketTimeoutMillis = this.socketTimeoutMillis ?: socketTimeoutMillis
+            this.connectTimeout = this.connectTimeout ?: connectTimeout
+            this.socketTimeout = this.socketTimeout ?: socketTimeout
 
             if (supportsRequestTimeout) {
-                this.requestTimeoutMillis = this.requestTimeoutMillis ?: requestTimeoutMillis
-                applyRequestTimeout(request, this.requestTimeoutMillis)
+                this.requestTimeout = this.requestTimeout ?: requestTimeout
+                applyRequestTimeout(request, this.requestTimeout)
             }
         }
         proceed(request)
@@ -175,12 +272,12 @@ private val HttpRequestBuilder.supportsRequestTimeout: Boolean
         body !is ClientUpgradeContent &&
         body !is SSEClientContent
 
-private fun CoroutineScope.applyRequestTimeout(request: HttpRequestBuilder, requestTimeout: Long?) {
-    if (requestTimeout == null || requestTimeout == HttpTimeoutConfig.INFINITE_TIMEOUT_MS) return
+private fun CoroutineScope.applyRequestTimeout(request: HttpRequestBuilder, requestTimeout: Duration?) {
+    if (requestTimeout == null || requestTimeout.isInfinite()) return
 
     val executionContext = request.executionContext
     val killer = launch(CoroutineName("request-timeout")) {
-        delay(requestTimeout.milliseconds)
+        delay(requestTimeout)
         val cause = HttpRequestTimeoutException(request)
         LOGGER.trace { "Request timeout: ${request.url}" }
         executionContext.cancel(cause.message!!, cause)
@@ -216,12 +313,12 @@ public class HttpRequestTimeoutException(
 
     public constructor(request: HttpRequestBuilder) : this(
         request.url.buildString(),
-        request.getCapabilityOrNull(HttpTimeoutCapability)?.requestTimeoutMillis
+        request.getCapabilityOrNull(HttpTimeoutCapability)?.requestTimeout?.inWholeMilliseconds
     )
 
     public constructor(request: HttpRequestData) : this(
         request.url.toString(),
-        request.getCapabilityOrNull(HttpTimeoutCapability)?.requestTimeoutMillis
+        request.getCapabilityOrNull(HttpTimeoutCapability)?.requestTimeout?.inWholeMilliseconds
     )
 
     override fun createCopy(): HttpRequestTimeoutException {
@@ -240,7 +337,9 @@ public fun ConnectTimeoutException(
     cause: Throwable? = null
 ): ConnectTimeoutException = ConnectTimeoutException(
     "Connect timeout has expired [url=${request.url}, " +
-        "connect_timeout=${request.getCapabilityOrNull(HttpTimeoutCapability)?.connectTimeoutMillis ?: "unknown"} ms]",
+        "connect_timeout=${
+            request.getCapabilityOrNull(HttpTimeoutCapability)?.connectTimeout?.inWholeMilliseconds ?: "unknown"
+        } ms]",
     cause
 )
 
@@ -271,7 +370,7 @@ public fun SocketTimeoutException(
 ): SocketTimeoutException = SocketTimeoutException(
     "Socket timeout has expired [url=${request.url}, " +
         "socket_timeout=${
-            request.getCapabilityOrNull(HttpTimeoutCapability)?.socketTimeoutMillis ?: "unknown"
+            request.getCapabilityOrNull(HttpTimeoutCapability)?.socketTimeout?.inWholeMilliseconds ?: "unknown"
         }] ms",
     cause
 )

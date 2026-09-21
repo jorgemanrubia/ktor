@@ -6,6 +6,7 @@ package io.ktor.network.sockets.nodejs
 
 import io.ktor.network.sockets.*
 import org.khronos.webgl.*
+import kotlin.time.Duration
 
 internal external interface NodeNet : JsAny {
     fun createConnection(options: CreateConnectionOptions): Socket
@@ -20,19 +21,13 @@ internal fun CreateConnectionOptions(
         host = remoteAddress.hostname
         port = remoteAddress.port
         noDelay = socketOptions.noDelay
-        timeout = when (socketOptions.socketTimeout) {
-            Long.MAX_VALUE -> Int.MAX_VALUE
-            else -> socketOptions.socketTimeout.toInt()
-        }
+        timeout = socketOptions.socketTimeoutDuration.toNodeTimeout()
         keepAlive = socketOptions.keepAlive
     }
 
     is UnixSocketAddress -> IpcCreateConnectionOptions {
         path = remoteAddress.path
-        timeout = when (socketOptions.socketTimeout) {
-            Long.MAX_VALUE -> Int.MAX_VALUE
-            else -> socketOptions.socketTimeout.toInt()
-        }
+        timeout = socketOptions.socketTimeoutDuration.toNodeTimeout()
     }
 }
 
@@ -166,4 +161,9 @@ internal fun ServerLocalAddressInfo.toSocketAddress(): SocketAddress = when (jsT
         val info = unsafeCast<TcpServerLocalAddressInfo>()
         InetSocketAddress(info.address, info.port)
     }
+}
+
+private fun Duration.toNodeTimeout(): Int = when {
+    isInfinite() -> Int.MAX_VALUE
+    else -> inWholeMilliseconds.toInt()
 }

@@ -34,5 +34,5 @@ internal data class ConnectionResponseTask(
  * Returns `true` if a request task contains timeout attributes specified using the [HttpTimeout] plugin.
  */
 private fun HttpRequestData.containsCustomTimeouts() = getCapabilityOrNull(HttpTimeoutCapability)?.let {
-    it.connectTimeoutMillis != null || it.socketTimeoutMillis != null
+    it.connectTimeout?.inWholeMilliseconds != null || it.socketTimeout?.inWholeMilliseconds != null
 } == true

@@ -51,7 +51,9 @@ public class AndroidClientEngine(override val config: AndroidEngineConfig) : Htt
         val connection: HttpURLConnection = getProxyAwareConnection(url).apply {
             disconnectOnCancellation(callContext)
 
+            @Suppress("DEPRECATION")
             connectTimeout = config.connectTimeout
+            @Suppress("DEPRECATION")
             readTimeout = config.socketTimeout
 
             setupTimeoutAttributes(data)

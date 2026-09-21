@@ -7,6 +7,8 @@ package io.ktor.tests.utils
 import io.ktor.util.*
 import kotlinx.coroutines.*
 import kotlin.test.*
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class StatelessHmacNonceManagerTest {
     private val nonceValues = listOf("11111111", "22222222", "33333333")
@@ -44,5 +46,16 @@ class StatelessHmacNonceManagerTest {
 
         val managerWithAnotherKey = StatelessHmacNonceManager("some-other-key".toByteArray()) { nonceValues[0] }
         assertFalse(manager.verifyNonce(managerWithAnotherKey.newNonce()))
+    }
+
+    @Test
+    fun testDurationTimeoutIsRespected(): Unit = runBlocking {
+        val shortLived = StatelessHmacNonceManager(key, timeout = 10.milliseconds)
+        val nonce = shortLived.newNonce()
+        delay(50)
+        assertFalse(shortLived.verifyNonce(nonce))
+
+        val longLived = StatelessHmacNonceManager(key, timeout = 60.seconds)
+        assertTrue(longLived.verifyNonce(longLived.newNonce()))
     }
 }

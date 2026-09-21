@@ -11,6 +11,8 @@ import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder
 import org.apache.hc.client5.http.ssl.HostnameVerificationPolicy
 import javax.net.ssl.SSLContext
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * A configuration for the [Apache5] client engine.
@@ -35,7 +37,26 @@ public class Apache5EngineConfig : HttpClientEngineConfig() {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.apache5.Apache5EngineConfig.socketTimeout)
      */
+    @Deprecated(
+        "Use socketTimeoutDuration with kotlin.time.Duration instead.",
+        ReplaceWith("socketTimeoutDuration"),
+        level = DeprecationLevel.WARNING
+    )
     public var socketTimeout: Int = 10_000
+
+    /**
+     * Specifies a maximum time of inactivity between two data packets when exchanging data with a server.
+     *
+     * Use [Duration.INFINITE] for an infinite timeout.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.apache5.Apache5EngineConfig.socketTimeoutDuration)
+     */
+    @Suppress("DEPRECATION")
+    public var socketTimeoutDuration: Duration
+        get() = if (socketTimeout == 0) Duration.INFINITE else socketTimeout.milliseconds
+        set(value) {
+            socketTimeout = value.toMillisWithInfiniteAsZero().coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        }
 
     /**
      * Specifies a time period (in milliseconds) in which a client should establish a connection with a server.
@@ -44,7 +65,26 @@ public class Apache5EngineConfig : HttpClientEngineConfig() {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.apache5.Apache5EngineConfig.connectTimeout)
      */
+    @Deprecated(
+        "Use connectTimeoutDuration with kotlin.time.Duration instead.",
+        ReplaceWith("connectTimeoutDuration"),
+        level = DeprecationLevel.WARNING
+    )
     public var connectTimeout: Long = 10_000
+
+    /**
+     * Specifies a time period in which a client should establish a connection with a server.
+     *
+     * Use [Duration.INFINITE] for an infinite timeout, or `null` for the system's default value.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.apache5.Apache5EngineConfig.connectTimeoutDuration)
+     */
+    @Suppress("DEPRECATION")
+    public var connectTimeoutDuration: Duration?
+        get() = connectTimeout.toDurationWithZeroAsInfinite()
+        set(value) {
+            connectTimeout = value?.toMillisWithInfiniteAsZero() ?: -1L
+        }
 
     /**
      * Specifies a time period (in milliseconds) in which a client should start a request.
@@ -53,7 +93,26 @@ public class Apache5EngineConfig : HttpClientEngineConfig() {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.apache5.Apache5EngineConfig.connectionRequestTimeout)
      */
+    @Deprecated(
+        "Use connectionRequestTimeoutDuration with kotlin.time.Duration instead.",
+        ReplaceWith("connectionRequestTimeoutDuration"),
+        level = DeprecationLevel.WARNING
+    )
     public var connectionRequestTimeout: Long = 20_000
+
+    /**
+     * Specifies a time period in which a client should start a request.
+     *
+     * Use [Duration.INFINITE] for an infinite timeout, or `null` for the system's default value.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.apache5.Apache5EngineConfig.connectionRequestTimeoutDuration)
+     */
+    @Suppress("DEPRECATION")
+    public var connectionRequestTimeoutDuration: Duration?
+        get() = connectionRequestTimeout.toDurationWithZeroAsInfinite()
+        set(value) {
+            connectionRequestTimeout = value?.toMillisWithInfiniteAsZero() ?: -1L
+        }
 
     /**
      * Allows you to configure [SSL](https://ktor.io/docs/client-ssl.html) settings for this engine.
@@ -137,4 +196,12 @@ public class Apache5EngineConfig : HttpClientEngineConfig() {
     public fun configureConnectionManager(block: PoolingAsyncClientConnectionManagerBuilder.() -> Unit) {
         configureConnectionManager = { block() }
     }
+}
+
+private fun Duration.toMillisWithInfiniteAsZero(): Long = if (isInfinite()) 0L else inWholeMilliseconds
+
+private fun Long.toDurationWithZeroAsInfinite(): Duration? = when {
+    this < 0 -> null
+    this == 0L -> Duration.INFINITE
+    else -> milliseconds
 }

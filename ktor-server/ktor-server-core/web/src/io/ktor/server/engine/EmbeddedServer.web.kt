@@ -10,6 +10,8 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.internal.*
 import io.ktor.utils.io.InternalAPI
 import kotlinx.coroutines.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 public actual class EmbeddedServer<
     TEngine : ApplicationEngine,
@@ -85,14 +87,46 @@ actual constructor(
         return this
     }
 
-    public actual fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
-        engine.stop(gracePeriodMillis, timeoutMillis)
+    public actual fun stop() {
+        stop(engineConfig.shutdownGracePeriodDuration, engineConfig.shutdownTimeoutDuration)
+    }
+
+    public actual fun stop(gracePeriod: Duration, timeout: Duration) {
+        engine.stop(gracePeriod, timeout)
         serverScope.launch { destroy(application) }
     }
 
-    public actual suspend fun stopSuspend(gracePeriodMillis: Long, timeoutMillis: Long) {
-        engine.stopSuspend(gracePeriodMillis, timeoutMillis)
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    public actual fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
+    }
+
+    public actual suspend fun stopSuspend() {
+        stopSuspend(engineConfig.shutdownGracePeriodDuration, engineConfig.shutdownTimeoutDuration)
+    }
+
+    public actual suspend fun stopSuspend(gracePeriod: Duration, timeout: Duration) {
+        engine.stopSuspend(gracePeriod, timeout)
         destroy(application)
+    }
+
+    @Deprecated(
+        "Use stopSuspend(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    public actual suspend fun stopSuspend(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
     }
 
     @OptIn(InternalAPI::class)

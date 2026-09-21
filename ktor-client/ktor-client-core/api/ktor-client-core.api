@@ -395,17 +395,23 @@ public final class io/ktor/client/plugins/HttpRequestRetryConfig {
 	public fun <init> ()V
 	public final fun constantDelay (JJZ)V
 	public static synthetic fun constantDelay$default (Lio/ktor/client/plugins/HttpRequestRetryConfig;JJZILjava/lang/Object;)V
+	public final fun constantDelay-NqJ4yvY (JJZ)V
+	public static synthetic fun constantDelay-NqJ4yvY$default (Lio/ktor/client/plugins/HttpRequestRetryConfig;JJZILjava/lang/Object;)V
 	public final fun delay (Lkotlin/jvm/functions/Function2;)V
 	public final fun delayMillis (ZLkotlin/jvm/functions/Function2;)V
 	public static synthetic fun delayMillis$default (Lio/ktor/client/plugins/HttpRequestRetryConfig;ZLkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public final fun exponentialDelay (DJJJZ)V
 	public static synthetic fun exponentialDelay$default (Lio/ktor/client/plugins/HttpRequestRetryConfig;DJJJZILjava/lang/Object;)V
+	public final fun exponentialDelay-LkbYN5k (JDJJZ)V
+	public static synthetic fun exponentialDelay-LkbYN5k$default (Lio/ktor/client/plugins/HttpRequestRetryConfig;JDJJZILjava/lang/Object;)V
 	public final fun getMaxRetries ()I
 	public final fun getModifyRequest ()Lkotlin/jvm/functions/Function2;
 	public final fun getRetryIf ()Lkotlin/jvm/functions/Function3;
 	public final fun getRetryOnExceptionIf ()Lkotlin/jvm/functions/Function3;
 	public final fun modifyRequest (Lkotlin/jvm/functions/Function2;)V
 	public final fun noRetry ()V
+	public final fun retryDelay (ZLkotlin/jvm/functions/Function2;)V
+	public static synthetic fun retryDelay$default (Lio/ktor/client/plugins/HttpRequestRetryConfig;ZLkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public final fun retryIf (ILkotlin/jvm/functions/Function3;)V
 	public static synthetic fun retryIf$default (Lio/ktor/client/plugins/HttpRequestRetryConfig;ILkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
 	public final fun retryOnException (IZ)V
@@ -489,15 +495,24 @@ public final class io/ktor/client/plugins/HttpTimeoutCapability : io/ktor/client
 public final class io/ktor/client/plugins/HttpTimeoutConfig {
 	public static final field Companion Lio/ktor/client/plugins/HttpTimeoutConfig$Companion;
 	public static final field INFINITE_TIMEOUT_MS J
+	public fun <init> ()V
 	public fun <init> (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;)V
 	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lkotlin/time/Duration;Lkotlin/time/Duration;Lkotlin/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lkotlin/time/Duration;Lkotlin/time/Duration;Lkotlin/time/Duration;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConnectTimeout-FghU774 ()Lkotlin/time/Duration;
 	public final fun getConnectTimeoutMillis ()Ljava/lang/Long;
+	public final fun getRequestTimeout-FghU774 ()Lkotlin/time/Duration;
 	public final fun getRequestTimeoutMillis ()Ljava/lang/Long;
+	public final fun getSocketTimeout-FghU774 ()Lkotlin/time/Duration;
 	public final fun getSocketTimeoutMillis ()Ljava/lang/Long;
 	public fun hashCode ()I
+	public final fun setConnectTimeout-BwNAW2A (Lkotlin/time/Duration;)V
 	public final fun setConnectTimeoutMillis (Ljava/lang/Long;)V
+	public final fun setRequestTimeout-BwNAW2A (Lkotlin/time/Duration;)V
 	public final fun setRequestTimeoutMillis (Ljava/lang/Long;)V
+	public final fun setSocketTimeout-BwNAW2A (Lkotlin/time/Duration;)V
 	public final fun setSocketTimeoutMillis (Ljava/lang/Long;)V
 }
 

@@ -12,6 +12,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.time.Duration
 
 /**
  * Represents an embedded server that hosts an application.
@@ -43,11 +44,69 @@ public expect class EmbeddedServer<TEngine : ApplicationEngine, TConfiguration :
 
     public suspend fun startSuspend(wait: Boolean = false): EmbeddedServer<TEngine, TConfiguration>
 
+    /**
+     * Stops this server using the grace period and timeout from the engine configuration.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.EmbeddedServer.stop)
+     */
+    public fun stop()
+
+    /**
+     * Stops this server.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.EmbeddedServer.stop)
+     *
+     * @param gracePeriod the maximum amount of time for activity to cool down
+     * @param timeout the maximum amount of time to wait until a server stops gracefully
+     */
+    public fun stop(
+        gracePeriod: Duration = engineConfig.shutdownGracePeriodDuration,
+        timeout: Duration = engineConfig.shutdownTimeoutDuration
+    )
+
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    @Suppress("DEPRECATION")
     public fun stop(
         gracePeriodMillis: Long = engineConfig.shutdownGracePeriod,
         timeoutMillis: Long = engineConfig.shutdownTimeout
     )
 
+    /**
+     * Stops this server using the grace period and timeout from the engine configuration.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.EmbeddedServer.stopSuspend)
+     */
+    public suspend fun stopSuspend()
+
+    /**
+     * Stops this server.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.EmbeddedServer.stopSuspend)
+     *
+     * @param gracePeriod the maximum amount of time for activity to cool down
+     * @param timeout the maximum amount of time to wait until a server stops gracefully
+     */
+    public suspend fun stopSuspend(
+        gracePeriod: Duration = engineConfig.shutdownGracePeriodDuration,
+        timeout: Duration = engineConfig.shutdownTimeoutDuration
+    )
+
+    @Deprecated(
+        "Use stopSuspend(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    @Suppress("DEPRECATION")
     public suspend fun stopSuspend(
         gracePeriodMillis: Long = engineConfig.shutdownGracePeriod,
         timeoutMillis: Long = engineConfig.shutdownTimeout

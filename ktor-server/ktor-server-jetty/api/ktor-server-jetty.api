@@ -35,6 +35,7 @@ public class io/ktor/server/jetty/JettyApplicationEngineBase : io/ktor/server/en
 	public synthetic fun start (Z)Lio/ktor/server/engine/ApplicationEngine;
 	public fun start (Z)Lio/ktor/server/jetty/JettyApplicationEngineBase;
 	public fun stop (JJ)V
+	public fun stop-QTBD994 (JJ)V
 	public fun toString ()Ljava/lang/String;
 }
 

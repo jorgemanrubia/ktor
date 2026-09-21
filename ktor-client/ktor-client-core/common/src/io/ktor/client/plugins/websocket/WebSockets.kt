@@ -16,6 +16,8 @@ import io.ktor.util.*
 import io.ktor.util.logging.*
 import io.ktor.utils.io.*
 import io.ktor.websocket.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 private val REQUEST_EXTENSIONS_KEY = AttributeKey<List<WebSocketExtension<*>>>("Websocket extensions")
 
@@ -50,6 +52,11 @@ public data object WebSocketExtensionsCapability : HttpClientEngineCapability<Un
  * @property channelsConfig - configuration for the I/O frame channels
  */
 public class WebSockets internal constructor(
+    @Deprecated(
+        "Use pingInterval with kotlin.time.Duration instead.",
+        ReplaceWith("pingInterval"),
+        level = DeprecationLevel.WARNING
+    )
     public val pingIntervalMillis: Long,
     public val maxFrameSize: Long,
     private val extensionsConfig: WebSocketExtensionsConfig,
@@ -64,6 +71,14 @@ public class WebSockets internal constructor(
      * @param pingIntervalMillis - interval between [FrameType.PING] messages.
      * @param maxFrameSize - max size of a single websocket frame.
      */
+    @Deprecated(
+        "Use the WebSockets(pingInterval, maxFrameSize) factory with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "WebSockets(pingIntervalMillis.milliseconds, maxFrameSize)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public constructor(
         pingIntervalMillis: Long = PINGER_DISABLED,
         maxFrameSize: Long = Int.MAX_VALUE.toLong()
@@ -106,8 +121,9 @@ public class WebSockets internal constructor(
     internal fun convertSessionToDefault(session: WebSocketSession): DefaultWebSocketSession {
         if (session is DefaultWebSocketSession) return session
 
-        val timeoutMillis = (pingIntervalMillis * 2)
-        return DefaultWebSocketSession(session, pingIntervalMillis, timeoutMillis, channelsConfig).also {
+        val pingInterval = pingInterval
+        val timeout = (pingInterval ?: Duration.ZERO) * 2
+        return DefaultWebSocketSession(session, pingInterval, timeout, channelsConfig).also {
             it.maxFrameSize = this@WebSockets.maxFrameSize
         }
     }
@@ -131,6 +147,11 @@ public class WebSockets internal constructor(
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.plugins.websocket.WebSockets.Config.pingIntervalMillis)
          */
+        @Deprecated(
+            "Use pingInterval with kotlin.time.Duration instead.",
+            ReplaceWith("pingInterval"),
+            level = DeprecationLevel.WARNING
+        )
         public var pingIntervalMillis: Long = PINGER_DISABLED
 
         /**
@@ -189,7 +210,7 @@ public class WebSockets internal constructor(
         override fun prepare(block: Config.() -> Unit): WebSockets {
             val config = Config().apply(block)
             return WebSockets(
-                config.pingIntervalMillis,
+                config.pingInterval?.inWholeMilliseconds ?: PINGER_DISABLED,
                 config.maxFrameSize,
                 config.extensionsConfig,
                 config.contentConverter,

@@ -68,7 +68,9 @@ internal class Apache5Engine(override val config: Apache5EngineConfig) : HttpCli
                 disableConnectionState()
                 disableCookieManagement()
 
-                val socketTimeoutMillis: Long = timeout?.socketTimeoutMillis ?: config.socketTimeout.toLong()
+                @Suppress("DEPRECATION")
+                val socketTimeoutMillis: Long =
+                    timeout?.socketTimeout?.inWholeMilliseconds ?: config.socketTimeout.toLong()
                 val socketTimeout = if (socketTimeoutMillis == HttpTimeoutConfig.INFINITE_TIMEOUT_MS) {
                     null
                 } else {
@@ -77,7 +79,9 @@ internal class Apache5Engine(override val config: Apache5EngineConfig) : HttpCli
                         TimeUnit.MILLISECONDS
                     )
                 }
-                val connectTimeoutMillis: Long = timeout?.connectTimeoutMillis ?: config.connectTimeout
+
+                @Suppress("DEPRECATION")
+                val connectTimeoutMillis: Long = timeout?.connectTimeout?.inWholeMilliseconds ?: config.connectTimeout
                 val connectTimeout = if (connectTimeoutMillis == HttpTimeoutConfig.INFINITE_TIMEOUT_MS) {
                     0
                 } else {

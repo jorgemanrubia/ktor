@@ -278,13 +278,17 @@ public final class io/ktor/network/sockets/SocketOptions$TCPClientSocketOptions 
 	public synthetic fun copy$ktor_network ()Lio/ktor/network/sockets/SocketOptions$PeerSocketOptions;
 	public synthetic fun copy$ktor_network ()Lio/ktor/network/sockets/SocketOptions;
 	public final fun getKeepAlive ()Ljava/lang/Boolean;
+	public final fun getLinger-FghU774 ()Lkotlin/time/Duration;
 	public final fun getLingerSeconds ()I
 	public final fun getNoDelay ()Z
 	public final fun getSocketTimeout ()J
+	public final fun getSocketTimeoutDuration-UwyO8pc ()J
 	public final fun setKeepAlive (Ljava/lang/Boolean;)V
+	public final fun setLinger-BwNAW2A (Lkotlin/time/Duration;)V
 	public final fun setLingerSeconds (I)V
 	public final fun setNoDelay (Z)V
 	public final fun setSocketTimeout (J)V
+	public final fun setSocketTimeoutDuration-LRDsOJo (J)V
 }
 
 public final class io/ktor/network/sockets/SocketOptions$UDPSocketOptions : io/ktor/network/sockets/SocketOptions$PeerSocketOptions {

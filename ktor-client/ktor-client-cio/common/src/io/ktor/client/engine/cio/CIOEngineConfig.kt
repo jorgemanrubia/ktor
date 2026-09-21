@@ -7,6 +7,8 @@ package io.ktor.client.engine.cio
 import io.ktor.client.engine.*
 import io.ktor.client.plugins.*
 import io.ktor.network.tls.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * A configuration for the [CIO] client engine.
@@ -44,7 +46,28 @@ public class CIOEngineConfig : HttpClientEngineConfig() {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.cio.CIOEngineConfig.requestTimeout)
      */
+    @Deprecated(
+        "Use requestTimeoutDuration with kotlin.time.Duration instead.",
+        ReplaceWith("requestTimeoutDuration"),
+        level = DeprecationLevel.WARNING
+    )
     public var requestTimeout: Long = 15000
+
+    /**
+     * Specifies a request timeout.
+     * The request timeout is the time period required to process an HTTP call:
+     * from sending a request to receiving a response.
+     *
+     * To disable this timeout, set its value to [Duration.INFINITE].
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.cio.CIOEngineConfig.requestTimeoutDuration)
+     */
+    @Suppress("DEPRECATION")
+    public var requestTimeoutDuration: Duration
+        get() = if (requestTimeout == 0L) Duration.INFINITE else requestTimeout.milliseconds
+        set(value) {
+            requestTimeout = if (value.isInfinite()) 0L else value.inWholeMilliseconds
+        }
 
     /**
      * Resolves a hostname to a list of IP address strings used to establish connections.
@@ -103,7 +126,24 @@ public class EndpointConfig {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.cio.EndpointConfig.keepAliveTime)
      */
+    @Deprecated(
+        "Use keepAliveDuration with kotlin.time.Duration instead.",
+        ReplaceWith("keepAliveDuration"),
+        level = DeprecationLevel.WARNING
+    )
     public var keepAliveTime: Long = 5000
+
+    /**
+     * Specifies a connection keep-alive time.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.cio.EndpointConfig.keepAliveDuration)
+     */
+    @Suppress("DEPRECATION")
+    public var keepAliveDuration: Duration
+        get() = keepAliveTime.milliseconds
+        set(value) {
+            keepAliveTime = value.inWholeMilliseconds
+        }
 
     /**
      * Specifies a maximum number of requests to be sent over a single connection without waiting for the corresponding responses (HTTP pipelining).
@@ -117,14 +157,49 @@ public class EndpointConfig {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.cio.EndpointConfig.connectTimeout)
      */
+    @Deprecated(
+        "Use connectTimeoutDuration with kotlin.time.Duration instead.",
+        ReplaceWith("connectTimeoutDuration"),
+        level = DeprecationLevel.WARNING
+    )
     public var connectTimeout: Long = 5000
+
+    /**
+     * Specifies a time period in which a client should establish a connection with a server.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.cio.EndpointConfig.connectTimeoutDuration)
+     */
+    @Suppress("DEPRECATION")
+    public var connectTimeoutDuration: Duration
+        get() = connectTimeout.milliseconds
+        set(value) {
+            connectTimeout = value.inWholeMilliseconds
+        }
 
     /**
      * Specifies a maximum time (in milliseconds) of inactivity between two data packets when exchanging data with a server.
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.cio.EndpointConfig.socketTimeout)
      */
+    @Deprecated(
+        "Use socketTimeoutDuration with kotlin.time.Duration instead.",
+        ReplaceWith("socketTimeoutDuration"),
+        level = DeprecationLevel.WARNING
+    )
     public var socketTimeout: Long = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
+
+    /**
+     * Specifies a maximum time of inactivity between two data packets when exchanging data with a server.
+     * Use [Duration.INFINITE] to disable the timeout.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.client.engine.cio.EndpointConfig.socketTimeoutDuration)
+     */
+    @Suppress("DEPRECATION")
+    public var socketTimeoutDuration: Duration
+        get() = socketTimeout.milliseconds
+        set(value) {
+            socketTimeout = value.inWholeMilliseconds
+        }
 
     /**
      * Specifies a maximum number of connection attempts.

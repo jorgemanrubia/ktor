@@ -8,6 +8,9 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.internal.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * An engine which runs an application.
@@ -54,18 +57,50 @@ public interface ApplicationEngine {
         public var callGroupSize: Int = parallelism
 
         /**
+         * Specifies the maximum amount of time for activity to cool down
+         *
+         * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.ApplicationEngine.Configuration.shutdownGracePeriodDuration)
+         */
+        public var shutdownGracePeriodDuration: Duration = 1.seconds
+
+        /**
+         * Specifies the maximum amount of time to wait until server stops gracefully
+         *
+         * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.ApplicationEngine.Configuration.shutdownTimeoutDuration)
+         */
+        public var shutdownTimeoutDuration: Duration = 5.seconds
+
+        /**
          * Specifies the maximum amount of time in milliseconds for activity to cool down
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.ApplicationEngine.Configuration.shutdownGracePeriod)
          */
-        public var shutdownGracePeriod: Long = 1000
+        @Deprecated(
+            "Use shutdownGracePeriodDuration with kotlin.time.Duration instead.",
+            ReplaceWith("shutdownGracePeriodDuration"),
+            level = DeprecationLevel.WARNING
+        )
+        public var shutdownGracePeriod: Long
+            get() = shutdownGracePeriodDuration.inWholeMilliseconds
+            set(value) {
+                shutdownGracePeriodDuration = value.milliseconds
+            }
 
         /**
          * Specifies the maximum amount of time in milliseconds to wait until server stops gracefully
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.ApplicationEngine.Configuration.shutdownTimeout)
          */
-        public var shutdownTimeout: Long = 5000
+        @Deprecated(
+            "Use shutdownTimeoutDuration with kotlin.time.Duration instead.",
+            ReplaceWith("shutdownTimeoutDuration"),
+            level = DeprecationLevel.WARNING
+        )
+        public var shutdownTimeout: Long
+            get() = shutdownTimeoutDuration.inWholeMilliseconds
+            set(value) {
+                shutdownTimeoutDuration = value.milliseconds
+            }
 
         /**
          * List of connectors describing where and how the server should listen.
@@ -83,8 +118,8 @@ public interface ApplicationEngine {
             connectionGroupSize = other.connectionGroupSize
             workerGroupSize = other.workerGroupSize
             callGroupSize = other.callGroupSize
-            shutdownGracePeriod = other.shutdownGracePeriod
-            shutdownTimeout = other.shutdownTimeout
+            shutdownGracePeriodDuration = other.shutdownGracePeriodDuration
+            shutdownTimeoutDuration = other.shutdownTimeoutDuration
             connectors.addAll(other.connectors)
         }
     }
@@ -133,6 +168,28 @@ public interface ApplicationEngine {
     }
 
     /**
+     * Stops this [ApplicationEngine] with the default grace period and timeout of 500 milliseconds each.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.ApplicationEngine.stop)
+     */
+    public fun stop() {
+        stop(DEFAULT_STOP_GRACE_PERIOD, DEFAULT_STOP_TIMEOUT)
+    }
+
+    /**
+     * Stops this [ApplicationEngine].
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.ApplicationEngine.stop)
+     *
+     * @param gracePeriod the maximum amount of time for activity to cool down
+     * @param timeout the maximum amount of time to wait until a server stops gracefully
+     */
+    @Suppress("DEPRECATION")
+    public fun stop(gracePeriod: Duration, timeout: Duration = DEFAULT_STOP_TIMEOUT) {
+        stop(gracePeriod.inWholeMilliseconds, timeout.inWholeMilliseconds)
+    }
+
+    /**
      * Stops this [ApplicationEngine].
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.ApplicationEngine.stop)
@@ -140,7 +197,36 @@ public interface ApplicationEngine {
      * @param gracePeriodMillis the maximum amount of time for activity to cool down
      * @param timeoutMillis the maximum amount of time to wait until a server stops gracefully
      */
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public fun stop(gracePeriodMillis: Long = 500, timeoutMillis: Long = 500)
+
+    /**
+     * Stops this [ApplicationEngine] with the default grace period and timeout of 500 milliseconds each.
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.ApplicationEngine.stopSuspend)
+     */
+    public suspend fun stopSuspend() {
+        stopSuspend(DEFAULT_STOP_GRACE_PERIOD, DEFAULT_STOP_TIMEOUT)
+    }
+
+    /**
+     * Stops this [ApplicationEngine].
+     *
+     * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.engine.ApplicationEngine.stopSuspend)
+     *
+     * @param gracePeriod the maximum amount of time for activity to cool down
+     * @param timeout the maximum amount of time to wait until a server stops gracefully
+     */
+    public suspend fun stopSuspend(gracePeriod: Duration, timeout: Duration = DEFAULT_STOP_TIMEOUT) {
+        withContext(Dispatchers.IOBridge) { stop(gracePeriod, timeout) }
+    }
 
     /**
      * Stops this [ApplicationEngine].
@@ -150,7 +236,20 @@ public interface ApplicationEngine {
      * @param gracePeriodMillis the maximum amount of time for activity to cool down
      * @param timeoutMillis the maximum amount of time to wait until a server stops gracefully
      */
+    @Deprecated(
+        "Use stopSuspend(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public suspend fun stopSuspend(gracePeriodMillis: Long = 500, timeoutMillis: Long = 500) {
-        withContext(Dispatchers.IOBridge) { stop(gracePeriodMillis, timeoutMillis) }
+        stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
+    }
+
+    public companion object {
+        private val DEFAULT_STOP_GRACE_PERIOD: Duration = 500.milliseconds
+        private val DEFAULT_STOP_TIMEOUT: Duration = 500.milliseconds
     }
 }

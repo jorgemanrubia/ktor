@@ -45,7 +45,7 @@ internal fun HttpRequestData.convertToHttpRequest(callContext: CoroutineContext)
 
     with(builder) {
         getCapabilityOrNull(HttpTimeoutCapability)?.let { timeoutAttributes ->
-            timeoutAttributes.requestTimeoutMillis?.let {
+            timeoutAttributes.requestTimeout?.inWholeMilliseconds?.let {
                 if (!isTimeoutInfinite(it)) timeout(Duration.ofMillis(it))
             }
         }

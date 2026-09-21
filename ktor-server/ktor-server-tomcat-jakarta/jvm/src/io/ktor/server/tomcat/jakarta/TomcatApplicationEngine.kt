@@ -25,6 +25,8 @@ import org.apache.tomcat.util.net.openssl.OpenSSLImplementation
 import org.slf4j.Logger
 import java.nio.file.Files
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Tomcat application engine that runs it in embedded mode
@@ -174,8 +176,8 @@ public class TomcatApplicationEngine(
 
         cancellationJob = stopServerOnCancellation(
             applicationProvider(),
-            configuration.shutdownGracePeriod,
-            configuration.shutdownTimeout
+            configuration.shutdownGracePeriodDuration,
+            configuration.shutdownTimeoutDuration
         )
         if (wait) {
             server.server.await()
@@ -184,7 +186,7 @@ public class TomcatApplicationEngine(
         return this
     }
 
-    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+    override fun stop(gracePeriod: Duration, timeout: Duration) {
         if (!stopped.compareAndSet(expect = false, update = true)) return
 
         cancellationJob?.complete()
@@ -192,6 +194,18 @@ public class TomcatApplicationEngine(
         server.stop()
         server.destroy()
         tempDirectory.toFile().deleteRecursively()
+    }
+
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
     }
 
     public companion object {

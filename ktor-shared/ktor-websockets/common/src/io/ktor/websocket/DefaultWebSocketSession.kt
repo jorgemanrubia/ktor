@@ -19,6 +19,7 @@ import kotlinx.io.readByteArray
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 internal val LOGGER = KtorSimpleLogger("io.ktor.websocket.WebSocket")
 
@@ -44,14 +45,24 @@ public interface DefaultWebSocketSession : WebSocketSession {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.websocket.DefaultWebSocketSession.pingIntervalMillis)
      */
+    @Deprecated(
+        "Use pingInterval with kotlin.time.Duration instead.",
+        ReplaceWith("pingInterval"),
+        level = DeprecationLevel.WARNING
+    )
     public var pingIntervalMillis: Long
 
     /**
      * Specifies a timeout to wait for pong reply to ping; otherwise, the session will be terminated immediately.
-     * It doesn't have any effect if [pingIntervalMillis] is [PINGER_DISABLED].
+     * It doesn't have any effect if [pingInterval] is `null`.
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.websocket.DefaultWebSocketSession.timeoutMillis)
      */
+    @Deprecated(
+        "Use timeout with kotlin.time.Duration instead.",
+        ReplaceWith("timeout"),
+        level = DeprecationLevel.WARNING
+    )
     public var timeoutMillis: Long
 
     /**
@@ -79,9 +90,67 @@ public interface DefaultWebSocketSession : WebSocketSession {
  * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.websocket.DefaultWebSocketSession)
  *
  * @param session raw [WebSocketSession] to wrap.
+ * @param pingInterval interval between pings or `null` to disable.
+ * @param timeout timeout for pings.
+ */
+public fun DefaultWebSocketSession(
+    session: WebSocketSession,
+    pingInterval: Duration?,
+    timeout: Duration = 15.seconds,
+): DefaultWebSocketSession {
+    require(session !is DefaultWebSocketSession) { "Cannot wrap other DefaultWebSocketSession" }
+    return DefaultWebSocketSessionImpl(
+        raw = session,
+        pingInterval?.inWholeMilliseconds ?: PINGER_DISABLED,
+        timeout.inWholeMilliseconds,
+        incomingFramesConfig = ChannelConfig.UNLIMITED,
+        outgoingFramesConfig = OUTGOING_CHANNEL_CONFIG ?: ChannelConfig.UNLIMITED
+    )
+}
+
+/**
+ * Creates [DefaultWebSocketSession] from a session.
+ *
+ * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.websocket.DefaultWebSocketSession)
+ *
+ * @param session raw [WebSocketSession] to wrap.
+ * @param pingInterval interval between pings or `null` to disable.
+ * @param timeout timeout for pings.
+ * @param channelsConfig configuration for the I/O frame channels.
+ */
+public fun DefaultWebSocketSession(
+    session: WebSocketSession,
+    pingInterval: Duration?,
+    timeout: Duration = 15.seconds,
+    channelsConfig: WebSocketChannelsConfig = WebSocketChannelsConfig.UNLIMITED,
+): DefaultWebSocketSession {
+    require(session !is DefaultWebSocketSession) { "Cannot wrap other DefaultWebSocketSession" }
+    return DefaultWebSocketSessionImpl(
+        session,
+        pingInterval?.inWholeMilliseconds ?: PINGER_DISABLED,
+        timeout.inWholeMilliseconds,
+        incomingFramesConfig = channelsConfig.incoming,
+        outgoingFramesConfig = channelsConfig.outgoing,
+    )
+}
+
+/**
+ * Creates [DefaultWebSocketSession] from a session.
+ *
+ * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.websocket.DefaultWebSocketSession)
+ *
+ * @param session raw [WebSocketSession] to wrap.
  * @param pingIntervalMillis interval between pings or [PINGER_DISABLED] to disable.
  * @param timeoutMillis timeout for pings.
  */
+@Deprecated(
+    "Use the overload with kotlin.time.Duration instead.",
+    ReplaceWith(
+        "DefaultWebSocketSession(session, pingIntervalMillis.milliseconds, timeoutMillis.milliseconds)",
+        "kotlin.time.Duration.Companion.milliseconds"
+    ),
+    level = DeprecationLevel.WARNING
+)
 public fun DefaultWebSocketSession(
     session: WebSocketSession,
     pingIntervalMillis: Long = PINGER_DISABLED,
@@ -107,6 +176,14 @@ public fun DefaultWebSocketSession(
  * @param timeoutMillis timeout for pings.
  * @param channelsConfig configuration for the I/O frame channels.
  */
+@Deprecated(
+    "Use the overload with kotlin.time.Duration instead.",
+    ReplaceWith(
+        "DefaultWebSocketSession(session, pingIntervalMillis.milliseconds, timeoutMillis.milliseconds, channelsConfig)",
+        "kotlin.time.Duration.Companion.milliseconds"
+    ),
+    level = DeprecationLevel.WARNING
+)
 public fun DefaultWebSocketSession(
     session: WebSocketSession,
     pingIntervalMillis: Long = PINGER_DISABLED,
@@ -137,6 +214,7 @@ private val OUTGOING_CHANNEL_CONFIG = OUTGOING_CHANNEL_CAPACITY?.let {
  */
 
 @OptIn(InternalAPI::class)
+@Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
 internal class DefaultWebSocketSessionImpl(
     private val raw: WebSocketSession,
     pingIntervalMillis: Long,
@@ -432,6 +510,7 @@ internal class DefaultWebSocketSessionImpl(
  *
  * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.websocket.pingInterval)
  */
+@Suppress("DEPRECATION")
 public inline var DefaultWebSocketSession.pingInterval: Duration?
     get() = pingIntervalMillis.takeIf { it > PINGER_DISABLED }?.milliseconds
     set(newDuration) {
@@ -444,6 +523,7 @@ public inline var DefaultWebSocketSession.pingInterval: Duration?
  *
  * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.websocket.timeout)
  */
+@Suppress("DEPRECATION")
 public inline var DefaultWebSocketSession.timeout: Duration
     get() = timeoutMillis.milliseconds
     set(newDuration) {

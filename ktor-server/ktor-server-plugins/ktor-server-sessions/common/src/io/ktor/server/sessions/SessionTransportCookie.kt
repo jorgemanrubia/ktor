@@ -33,7 +33,7 @@ public class SessionTransportCookie(
 
     override fun send(call: ApplicationCall, value: String) {
         val now = GMTDate()
-        val maxAge = configuration.maxAgeInSeconds
+        val maxAge = configuration.maxAge?.inWholeSeconds
         val expires = when (maxAge) {
             null, 0L -> null
             else -> now + maxAge * 1000L
@@ -88,6 +88,11 @@ public class CookieConfiguration {
      *
      * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.sessions.CookieConfiguration.maxAgeInSeconds)
      */
+    @Deprecated(
+        "Use maxAge with kotlin.time.Duration instead.",
+        ReplaceWith("maxAge"),
+        level = DeprecationLevel.WARNING
+    )
     public var maxAgeInSeconds: Long? = DEFAULT_SESSION_MAX_AGE
         set(newMaxAge) {
             require(newMaxAge == null || newMaxAge >= 0) { "maxAgeInSeconds shouldn't be negative: $newMaxAge" }

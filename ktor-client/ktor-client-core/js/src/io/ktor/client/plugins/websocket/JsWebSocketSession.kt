@@ -38,10 +38,12 @@ internal class JsWebSocketSession(
 
     override val closeReason: Deferred<CloseReason?> = _closeReason
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override var pingIntervalMillis: Long
         get() = throw WebSocketException("Websocket ping-pong is not supported in JS engine.")
         set(_) = throw WebSocketException("Websocket ping-pong is not supported in JS engine.")
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override var timeoutMillis: Long
         get() = throw WebSocketException("Websocket timeout is not supported in JS engine.")
         set(_) = throw WebSocketException("Websocket timeout is not supported in JS engine.")

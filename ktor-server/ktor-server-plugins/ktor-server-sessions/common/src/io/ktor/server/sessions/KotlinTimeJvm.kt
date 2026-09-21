@@ -15,6 +15,7 @@ import kotlin.time.Duration.Companion.seconds
  *
  * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.sessions.maxAge)
  */
+@Suppress("DEPRECATION")
 public var CookieConfiguration.maxAge: Duration?
     get() = maxAgeInSeconds?.seconds
     set(newMaxAge) {

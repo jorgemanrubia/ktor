@@ -10,6 +10,8 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.internal.*
 import io.ktor.utils.io.InternalAPI
 import kotlinx.coroutines.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 public actual class EmbeddedServer<
     TEngine : ApplicationEngine,
@@ -81,16 +83,48 @@ actual constructor(
         return withContext(Dispatchers.IOBridge) { start(wait) }
     }
 
-    public actual fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
-        destroyBlocking(application)
-        engine.stop(gracePeriodMillis, timeoutMillis)
+    public actual fun stop() {
+        stop(engineConfig.shutdownGracePeriodDuration, engineConfig.shutdownTimeoutDuration)
     }
 
-    public actual suspend fun stopSuspend(gracePeriodMillis: Long, timeoutMillis: Long) {
+    public actual fun stop(gracePeriod: Duration, timeout: Duration) {
+        destroyBlocking(application)
+        engine.stop(gracePeriod, timeout)
+    }
+
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    public actual fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
+    }
+
+    public actual suspend fun stopSuspend() {
+        stopSuspend(engineConfig.shutdownGracePeriodDuration, engineConfig.shutdownTimeoutDuration)
+    }
+
+    public actual suspend fun stopSuspend(gracePeriod: Duration, timeout: Duration) {
         withContext(Dispatchers.IOBridge) {
             destroy(application)
-            engine.stop(gracePeriodMillis, timeoutMillis)
+            engine.stop(gracePeriod, timeout)
         }
+    }
+
+    @Deprecated(
+        "Use stopSuspend(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    public actual suspend fun stopSuspend(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
     }
 
     private fun destroyBlocking(application: Application) {

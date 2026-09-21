@@ -65,7 +65,7 @@ public class JavaHttpEngine(override val config: JavaHttpConfig) : HttpClientEng
                 setupProxy()
 
                 data.getCapabilityOrNull(HttpTimeoutCapability)?.let { timeoutAttribute ->
-                    timeoutAttribute.connectTimeoutMillis?.let {
+                    timeoutAttribute.connectTimeout?.inWholeMilliseconds?.let {
                         if (!isTimeoutInfinite(it)) connectTimeout(Duration.ofMillis(it))
                     }
                 }

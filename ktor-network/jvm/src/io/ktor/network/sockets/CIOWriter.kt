@@ -20,8 +20,8 @@ internal fun CoroutineScope.attachForWritingDirectImpl(
 ): ReaderJob = reader(Dispatchers.IO + CoroutineName("cio-to-nio-writer"), channel) {
     selectable.interestOp(SelectInterest.WRITE, false)
     try {
-        val timeout = if (socketOptions?.socketTimeout != null) {
-            createTimeout("writing-direct", socketOptions.socketTimeout) {
+        val timeout = if (socketOptions?.socketTimeoutDuration != null) {
+            createTimeout("writing-direct", socketOptions.socketTimeoutDuration.inWholeMilliseconds) {
                 channel.close(SocketTimeoutException())
             }
         } else {

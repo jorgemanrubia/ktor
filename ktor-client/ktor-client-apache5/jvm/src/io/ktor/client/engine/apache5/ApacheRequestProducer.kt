@@ -68,6 +68,7 @@ private fun setupRequest(requestData: HttpRequestData, config: Apache5EngineConf
         }
     }
 
+    @Suppress("DEPRECATION")
     with(config) {
         request.config = RequestConfig.custom()
             .setRedirectsEnabled(followRedirects)

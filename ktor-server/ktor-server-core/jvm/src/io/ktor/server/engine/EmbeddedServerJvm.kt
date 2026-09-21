@@ -29,7 +29,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.getOrSet
 import kotlin.concurrent.read
 import kotlin.concurrent.write
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.toDuration
+import kotlin.time.toDurationUnit
 
 private typealias ApplicationModule = suspend Application.() -> Unit
 
@@ -331,7 +334,7 @@ actual constructor(
     private fun destroyBlocking(application: Application, classLoader: ClassLoader?) {
         try {
             runBlocking {
-                withTimeout(engineConfig.shutdownTimeout.milliseconds) {
+                withTimeout(engineConfig.shutdownTimeoutDuration) {
                     application.disposeAndJoin()
                 }
             }
@@ -420,9 +423,32 @@ actual constructor(
         return withContext(Dispatchers.IOBridge) { start(wait) }
     }
 
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(" +
+                "shutdownGracePeriod.toDuration(timeUnit.toDurationUnit()), " +
+                "shutdownTimeout.toDuration(timeUnit.toDurationUnit())" +
+                ")",
+            "kotlin.time.toDuration",
+            "kotlin.time.toDurationUnit"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public fun stop(shutdownGracePeriod: Long, shutdownTimeout: Long, timeUnit: TimeUnit) {
+        stop(
+            shutdownGracePeriod.toDuration(timeUnit.toDurationUnit()),
+            shutdownTimeout.toDuration(timeUnit.toDurationUnit())
+        )
+    }
+
+    public actual fun stop() {
+        stop(engineConfig.shutdownGracePeriodDuration, engineConfig.shutdownTimeoutDuration)
+    }
+
+    public actual fun stop(gracePeriod: Duration, timeout: Duration) {
         try {
-            engine.stop(timeUnit.toMillis(shutdownGracePeriod), timeUnit.toMillis(shutdownTimeout))
+            engine.stop(gracePeriod, timeout)
         } catch (e: Exception) {
             environment.log.warn("Exception occurred during engine shutdown", e)
         }
@@ -434,12 +460,36 @@ actual constructor(
         }
     }
 
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public actual fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
-        stop(gracePeriodMillis, timeoutMillis, TimeUnit.MILLISECONDS)
+        stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
     }
 
+    public actual suspend fun stopSuspend() {
+        stopSuspend(engineConfig.shutdownGracePeriodDuration, engineConfig.shutdownTimeoutDuration)
+    }
+
+    public actual suspend fun stopSuspend(gracePeriod: Duration, timeout: Duration) {
+        withContext(Dispatchers.IOBridge) { stop(gracePeriod, timeout) }
+    }
+
+    @Deprecated(
+        "Use stopSuspend(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
     public actual suspend fun stopSuspend(gracePeriodMillis: Long, timeoutMillis: Long) {
-        withContext(Dispatchers.IOBridge) { stop(gracePeriodMillis, timeoutMillis) }
+        stopSuspend(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
     }
 
     private fun instantiateAndConfigureApplication(currentClassLoader: ClassLoader): Application {

@@ -5,6 +5,7 @@
 package io.ktor.server.sessions
 
 import kotlin.test.*
+import kotlin.time.Duration.Companion.hours
 
 class SessionTransportCookieTest {
 
@@ -31,10 +32,24 @@ class SessionTransportCookieTest {
     @Test
     fun testClearZerosMaxAge() {
         val configuration = CookieConfiguration().apply {
+            @Suppress("DEPRECATION")
             maxAgeInSeconds = 1000
         }
 
         val cookie = SessionTransportCookie("session", configuration, emptyList())
         assertEquals(0, cookie.clearCookie().maxAge)
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun testMaxAgeDurationAndSecondsAreViewsOfTheSameValue() {
+        val configuration = CookieConfiguration().apply {
+            maxAge = 2.hours
+        }
+
+        assertEquals(7200, configuration.maxAgeInSeconds)
+
+        configuration.maxAgeInSeconds = null
+        assertNull(configuration.maxAge)
     }
 }

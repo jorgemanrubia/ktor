@@ -39,7 +39,7 @@ public fun CoroutineScope.httpServer(
     }
 
     val selector = SelectorManager(coroutineContext)
-    val timeout = settings.connectionIdleTimeoutSeconds.seconds
+    val timeout = settings.connectionIdleTimeout
     val rootConnectionJob = SupervisorJob(serverJob)
 
     val acceptJob = launch(serverJob + CoroutineName("accept-$settings")) {

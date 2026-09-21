@@ -8,9 +8,11 @@ public class io/ktor/server/plugins/hsts/HSTSHostConfig {
 	public fun <init> ()V
 	public final fun getCustomDirectives ()Ljava/util/Map;
 	public final fun getIncludeSubDomains ()Z
+	public final fun getMaxAgeDuration-UwyO8pc ()J
 	public final fun getMaxAgeInSeconds ()J
 	public final fun getPreload ()Z
 	public final fun setIncludeSubDomains (Z)V
+	public final fun setMaxAgeDuration-LRDsOJo (J)V
 	public final fun setMaxAgeInSeconds (J)V
 	public final fun setPreload (Z)V
 }

@@ -42,6 +42,9 @@ import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 import kotlin.system.measureTimeMillis
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 private val AFTER_CALL_PHASE = PipelinePhase("After")
 
@@ -88,18 +91,50 @@ public class NettyApplicationEngine(
         public var configureBootstrap: ServerBootstrap.() -> Unit = {}
 
         /**
+         * Timeout for sending responses to client
+         *
+         * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.netty.NettyApplicationEngine.Configuration.responseWriteTimeout)
+         */
+        public var responseWriteTimeout: Duration = 10.seconds
+
+        /**
+         * Timeout for reading requests from client, [Duration.INFINITE] is infinite.
+         *
+         * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.netty.NettyApplicationEngine.Configuration.requestReadTimeout)
+         */
+        public var requestReadTimeout: Duration = Duration.INFINITE
+
+        /**
          * Timeout in seconds for sending responses to client
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.netty.NettyApplicationEngine.Configuration.responseWriteTimeoutSeconds)
          */
-        public var responseWriteTimeoutSeconds: Int = 10
+        @Deprecated(
+            "Use responseWriteTimeout with kotlin.time.Duration instead.",
+            ReplaceWith("responseWriteTimeout"),
+            level = DeprecationLevel.WARNING
+        )
+        public var responseWriteTimeoutSeconds: Int
+            get() = responseWriteTimeout.inWholeSeconds.toInt()
+            set(value) {
+                responseWriteTimeout = value.seconds
+            }
 
         /**
          * Timeout in seconds for reading requests from client, "0" is infinite.
          *
          * [Report a problem](https://ktor.io/feedback/?fqname=io.ktor.server.netty.NettyApplicationEngine.Configuration.requestReadTimeoutSeconds)
          */
-        public var requestReadTimeoutSeconds: Int = 0
+        @Deprecated(
+            "Use requestReadTimeout with kotlin.time.Duration instead.",
+            ReplaceWith("requestReadTimeout"),
+            level = DeprecationLevel.WARNING
+        )
+        public var requestReadTimeoutSeconds: Int
+            get() = if (requestReadTimeout.isInfinite()) 0 else requestReadTimeout.inWholeSeconds.toInt()
+            set(value) {
+                requestReadTimeout = if (value == 0) Duration.INFINITE else value.seconds
+            }
 
         /**
          * If set to `true`, enables TCP keep alive for connections so all
@@ -302,8 +337,8 @@ public class NettyApplicationEngine(
                     userContext,
                     connector,
                     configuration.runningLimit,
-                    configuration.responseWriteTimeoutSeconds,
-                    configuration.requestReadTimeoutSeconds,
+                    configuration.responseWriteTimeout.inWholeSeconds.toInt(),
+                    configuration.requestReadTimeout.let { if (it.isInfinite()) 0 else it.inWholeSeconds.toInt() },
                     configuration.httpServerCodec,
                     configuration.channelPipelineConfig,
                     configuration.enableHttp2,
@@ -485,8 +520,8 @@ public class NettyApplicationEngine(
 
         cancellationJob = stopServerOnCancellation(
             applicationProvider(),
-            configuration.shutdownGracePeriod,
-            configuration.shutdownTimeout
+            configuration.shutdownGracePeriodDuration,
+            configuration.shutdownTimeoutDuration
         )
 
         if (wait) {
@@ -506,13 +541,27 @@ public class NettyApplicationEngine(
         }
     }
 
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
+    }
+
     private inline fun <R> withStopException(crossinline block: () -> R) {
         runCatching(block).onFailure {
             environment.log.error("Exception thrown during engine stop", it)
         }
     }
 
-    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+    override fun stop(gracePeriod: Duration, timeout: Duration) {
+        val gracePeriodMillis = gracePeriod.inWholeMilliseconds
+        val timeoutMillis = timeout.inWholeMilliseconds
         cancellationJob?.complete()
         monitor.raise(ApplicationStopPreparing, environment)
 

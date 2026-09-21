@@ -14,6 +14,7 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -85,8 +86,8 @@ public open class JettyApplicationEngineBase(
         server.start()
         cancellationJob = stopServerOnCancellation(
             applicationProvider(),
-            configuration.shutdownGracePeriod,
-            configuration.shutdownTimeout
+            configuration.shutdownGracePeriodDuration,
+            configuration.shutdownTimeoutDuration
         )
 
         val connectors = server.connectors
@@ -98,17 +99,29 @@ public open class JettyApplicationEngineBase(
 
         if (wait) {
             server.join()
-            stop(configuration.shutdownGracePeriod, configuration.shutdownTimeout)
+            stop(configuration.shutdownGracePeriodDuration, configuration.shutdownTimeoutDuration)
         }
         return this
     }
 
-    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+    override fun stop(gracePeriod: Duration, timeout: Duration) {
         cancellationJob?.complete()
         monitor.raise(ApplicationStopPreparing, environment)
-        server.stopTimeout = timeoutMillis
+        server.stopTimeout = timeout.inWholeMilliseconds
         server.stop()
         server.destroy()
+    }
+
+    @Deprecated(
+        "Use stop(gracePeriod, timeout) with kotlin.time.Duration instead.",
+        ReplaceWith(
+            "stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)",
+            "kotlin.time.Duration.Companion.milliseconds"
+        ),
+        level = DeprecationLevel.WARNING
+    )
+    override fun stop(gracePeriodMillis: Long, timeoutMillis: Long) {
+        stop(gracePeriodMillis.milliseconds, timeoutMillis.milliseconds)
     }
 
     override fun toString(): String {

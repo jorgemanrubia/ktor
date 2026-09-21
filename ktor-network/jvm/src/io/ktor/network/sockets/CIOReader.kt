@@ -24,8 +24,8 @@ internal fun CoroutineScope.attachForReadingImpl(
     val buffer = pool.borrow()
     return writer(Dispatchers.IO + CoroutineName("cio-from-nio-reader"), channel) {
         try {
-            val timeout = if (socketOptions?.socketTimeout != null) {
-                createTimeout("reading", socketOptions.socketTimeout) {
+            val timeout = if (socketOptions?.socketTimeoutDuration != null) {
+                createTimeout("reading", socketOptions.socketTimeoutDuration.inWholeMilliseconds) {
                     channel.close(SocketTimeoutException())
                 }
             } else {
@@ -83,8 +83,8 @@ internal fun CoroutineScope.attachForReadingDirectImpl(
     try {
         selectable.interestOp(SelectInterest.READ, false)
 
-        val timeout = if (socketOptions?.socketTimeout != null) {
-            createTimeout("reading-direct", socketOptions.socketTimeout) {
+        val timeout = if (socketOptions?.socketTimeoutDuration != null) {
+            createTimeout("reading-direct", socketOptions.socketTimeoutDuration.inWholeMilliseconds) {
                 channel.close(SocketTimeoutException())
             }
         } else {
